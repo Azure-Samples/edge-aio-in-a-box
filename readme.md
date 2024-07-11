@@ -1,5 +1,8 @@
 # AIO with AI in-a-box
-This solution is part of the the AI-in-a-Box framework developed by the team of Microsoft Customer Engineers and Architects to accelerate the deployment of AI and ML solutions. Our goal is to simplify the adoption of AI technologies by providing ready-to-use accelerators that ensure quality, efficiency, and rapid deployment. Read about and discover other AI-in-a-Box solutions at https://github.com/Azure/AI-in-a-Box.
+
+
+This solution is part of the the [AI-in-a-Box](https://github.com/Azure/AI-in-a-Box) framework developed by the team of Microsoft Customer Engineers and Architects to accelerate the deployment of AI and ML solutions. Our goal is to simplify the adoption of AI technologies by providing ready-to-use accelerators that ensure quality, efficiency, and rapid deployment. Read about and discover other AI-in-a-Box solutions at [https://github.com/Azure/AI-in-a-Box](https://github.com/Azure/AI-in-a-Box).
+
 
 ![Banner](./readme_assets/banner-aio-with-ai-in-a-box.png)
 
