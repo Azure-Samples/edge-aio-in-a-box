@@ -13,7 +13,7 @@ This deployment accelerator contains a minimal AIO (Azure IoT Operations/Kuberne
 1. **AIO with SLMs (RAG) on Edge** Deployment and Enablement of Small Language Models (SLMs) at the Edge within an AIO environment. This setup integrates SLMs to enable Retrieval-Augmented Generation (RAG) at the edge, optimizing performance and reducing reliance on cloud resources for a more efficient and responsive AIO deployment.
 
 ## Solution Architecture
-![AIO with AI](/edge-ai/AIO-with-AI/readme_assets/aioaiL.png) 
+![AIO with AI](/readme_assets/aioaiL.png) 
 
 ### The above architecture is explained step-by-step below:
 1. You create all your necessary Azure Resources
@@ -31,10 +31,10 @@ This deployment accelerator contains a minimal AIO (Azure IoT Operations/Kuberne
     1. You will build your model into a docker image and place that image in your container registry
     1. Using Azure ML Extension you will leverage the Azure ML Extension to pull the appropriate model from ACR into your K3s Cluster
 
-![AIO with AI Deployment Process](/edge-ai/AIO-with-AI/readme_assets/aiomldeploymentprocess.png) 
+![AIO with AI Deployment Process](/readme_assets/aiomldeploymentprocess.png) 
 
 ### Resources that will be deployed:
-![AIO with AI Resources](/edge-ai/AIO-with-AI/readme_assets/aioairesources.png) 
+![AIO with AI Resources](/readme_assets/aioairesources.png) 
 
 ## Prerequisites
 * An [Azure subscription](https://azure.microsoft.com/en-us/free/).
