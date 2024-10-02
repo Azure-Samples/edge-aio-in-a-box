@@ -27,17 +27,19 @@ param nsgId string = ''
 param keyVaultId string
 param keyVaultName string
 
-
 param spAppId string
 #disable-next-line secure-secrets-in-params
 @secure()
 param spSecret string
 param spObjectId string
+param spAppObjectId string
 
 param scriptURI string
 param ShellScriptName string
 
 param customLocationRPSPID string
+
+var osDiskType = 'Premium_LRS'
 
 var linuxConfiguration = {
   disablePasswordAuthentication: true
@@ -64,6 +66,7 @@ module nic '../vnet/nic.bicep' = {
   }
 }
 
+//https://learn.microsoft.com/en-us/azure/templates/microsoft.compute/2023-07-01/virtualmachines?pivots=deployment-language-bicep
 resource vm 'Microsoft.Compute/virtualMachines@2023-07-01' = {
   name: virtualMachineName
   location: location
@@ -92,9 +95,13 @@ resource vm 'Microsoft.Compute/virtualMachines@2023-07-01' = {
     }
     storageProfile: {
       osDisk: {
+        caching: 'ReadWrite'
         createOption: 'FromImage'
         osType: 'Linux'
         diskSizeGB: 80
+        managedDisk: {
+          storageAccountType: osDiskType
+        }
       }
       imageReference: {
         publisher: 'canonical'
@@ -121,12 +128,30 @@ resource vm 'Microsoft.Compute/virtualMachines@2023-07-01' = {
   }
 }
 
+module roleArcAdminRole '../identity/role.bicep' = {
+  name: 'deployVMRole_AzureArcClusterAdminRole'
+  scope: resourceGroup()
+  params:{
+    principalId: vmUserAssignedIdentityPrincipalID
+    roleGuid: '8393591c-06b9-48a2-a542-1bd6b377f6a2' // Kubernetes Cluster - Azure Kubernetes Service Arc Cluster Admin Role - Lets you manage all resources in the cluster.
+  }
+}
+
 module roleOnboarding '../identity/role.bicep' = {
   name: 'deployVMRole_AzureArcOnboarding'
   scope: resourceGroup()
   params:{
     principalId: vmUserAssignedIdentityPrincipalID
     roleGuid: '34e09817-6cbe-4d01-b1a2-e0eac5743d41' // Kubernetes Cluster - Azure Arc Onboarding
+  }
+}
+
+module roleAcrPull '../identity/role.bicep' = {
+  name: 'deployVMRole_AcrPull'
+  scope: resourceGroup()
+  params:{
+    principalId: vmUserAssignedIdentityPrincipalID
+    roleGuid: '7f951dda-4ed3-4680-a7ca-43fe172d538d' // Acro Pull
   }
 }
 
@@ -159,7 +184,7 @@ module roleOwner '../identity/role.bicep' = {
 
 resource vmext 'Microsoft.Compute/virtualMachines/extensions@2023-09-01' = {
   parent: vm
-  name: 'CustomScript'
+  name: 'installscript_k3s'
   location: location
   properties: {
     publisher: 'Microsoft.Azure.Extensions'
@@ -170,12 +195,15 @@ resource vmext 'Microsoft.Compute/virtualMachines/extensions@2023-09-01' = {
       fileUris: [
         '${scriptURI}${ShellScriptName}'
       ]
-      commandToExecute: 'sh ${ShellScriptName} ${resourceGroup().name} ${arcK8sClusterName} ${location} ${adminUsername} ${vmUserAssignedIdentityPrincipalID} ${customLocationRPSPID} ${keyVaultId} ${keyVaultName} ${subscription().subscriptionId} ${spAppId} ${spSecret} ${subscription().tenantId} ${spObjectId}'
+      commandToExecute: 'sh ${ShellScriptName} ${resourceGroup().name} ${arcK8sClusterName} ${location} ${adminUsername} ${vmUserAssignedIdentityPrincipalID} ${customLocationRPSPID} ${keyVaultId} ${keyVaultName} ${subscription().subscriptionId} ${spAppId} ${spSecret} ${subscription().tenantId} ${spObjectId} ${spAppObjectId}'
     }
   }
   dependsOn: [
     roleOnboarding
     roleK8sExtensionContributor
+    roleContributor
+    roleOwner
+    roleAcrPull
   ]
 }
 

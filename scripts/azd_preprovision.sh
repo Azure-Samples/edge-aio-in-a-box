@@ -5,7 +5,6 @@
 ########################################################################
 echo "Connecting to Azure..."
 echo "Setting Azure context with subscription id $env:AZURE_SUBSCRIPTION_ID ..."
-# echo "Setting az subscription..."
 az account set --subscription $env:AZURE_SUBSCRIPTION_ID
 
 ########################################################################
@@ -18,11 +17,13 @@ echo "Registering Azure providers..."
 # List of required azure providers
 ###################
 azProviders=(
+    "Microsoft.AlertsManagement",
     "Microsoft.Compute",
     "Microsoft.ContainerInstance",
     "Microsoft.ContainerService",
     "Microsoft.DeviceRegistry"
     "Microsoft.ExtendedLocation",
+    "Microsoft.IoTOperations",
     "Microsoft.IoTOperationsDataProcessor",
     "Microsoft.IoTOperationsMQ",
     "Microsoft.IoTOperationsOrchestrator",
@@ -30,7 +31,8 @@ azProviders=(
     "Microsoft.Kubernetes",
     "Microsoft.KubernetesConfiguration",
     "Microsoft.ManagedIdentity",
-    "Microsoft.Network"
+    "Microsoft.Network",
+    "Microsoft.Relay"
 )
 
 ###################
@@ -56,7 +58,7 @@ if (( ${#azProvidersNotRegistered[@]} > 0 )); then
   for provider in "${azProvidersNotRegistered[@]}"
   do
     echo "Registering Azure Provider: $provider"
-    az provider register --namespace $provider
+    az provider register --namespace $provider --wait
   done
 fi
 echo ""
@@ -117,25 +119,24 @@ fi
 # Retrieving the custom RP SP ID
 # Get the objectId of the Microsoft Entra ID application that the Azure Arc service uses and save it as an environment variable.
 ###################
-# bc313c14-388c-4e7d-a58e-70017303ee3b is Custom Locations RP
-echo "Setting Subscription Context"
-az account set --subscription $env:AZURE_SUBSCRIPTION_ID
 echo "Retrieving the Custom Location RP ObjectID from SP ID bc313c14-388c-4e7d-a58e-70017303ee3b"
 # Make sure that the command below is and/or pointing to the correct subscription and the MS Tenant
 customLocationRPSPID=$(az ad sp show --id bc313c14-388c-4e7d-a58e-70017303ee3b --query id -o tsv)
-echo "customLocationRPSPID: $customLocationRPSPID"
+echo "Custom Location RP SP ID: $customLocationRPSPID"
 azd env set AZURE_ENV_CUSTOMLOCATIONRPSPID $customLocationRPSPID
 
 ###################
 # Create a service principal used by IoT Operations to interact with Key Vault
 ###################
 echo "Creating a service principal for IoT Operations to interact with Key Vault..."
-iotOperationsKeyVaultSP=$(az ad sp create-for-rbac --name "aio-keyvault-sp")
+iotOperationsKeyVaultSP=$(az ad sp create-for-rbac --name "aiobx-keyvault-sp" --role "Owner" --scopes /subscriptions/$env:AZURE_SUBSCRIPTION_ID)
 spAppId=$(echo $iotOperationsKeyVaultSP | jq -r '.appId')
 spSecret=$(echo $iotOperationsKeyVaultSP | jq -r '.password')
 spobjId=$(az ad sp show --id $spAppId --query id -o tsv)
+spAppObjId = $(az ad app show --id $spAppId --query id -o tsv)
 
 echo "Setting the service principal environment variables..."
 azd env set AZURE_ENV_SPAPPID $spAppId
 azd env set AZURE_ENV_SPSECRET $spSecret
 azd env set AZURE_ENV_SPOBJECTID $spobjId
+azd env set AZURE_ENV_SPAPPOBJECTID $spAppObjId
