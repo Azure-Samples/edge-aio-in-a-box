@@ -118,7 +118,7 @@ param authenticationType string
 
 
 @sys.description('URI for K3s VM Configuraiton Script')
-param scriptURI string = 'https://github.com/Azure-Samples/edge-aio-in-a-box/blob/main/scripts/'
+param scriptURI string = 'https://raw.githubusercontent.com/Azure-Samples/edge-aio-in-a-box/main/scripts/'
 
 @sys.description('Shell Script to be executed')
 param ShellScriptName string = 'azd_configureK3s.sh'
@@ -207,6 +207,58 @@ module m_stg 'modules/aml/storage.bicep' = {
     location: location
   }
 }
+
+//10.A Create Log Analytics Workspace
+//https://learn.microsoft.com/en-us/azure/templates/microsoft.insights/components?pivots=deployment-language-bicep
+module m_loga 'modules/aml/loganalytics.bicep' = {
+  name: 'deploy_loganalytics'
+  scope: resourceGroup
+  params: {
+    location: location
+    logAnalyticsName: !useApplicationInsights ? '': !empty(logAnalyticsWorkspaceName) ? logAnalyticsWorkspaceName : '${abbrs.operationalInsightsWorkspaces}${resourceToken}'
+    tags: tags
+  }
+}
+
+//10.B Create Application Insights Instance
+//https://learn.microsoft.com/en-us/azure/templates/microsoft.insights/components?pivots=deployment-language-bicep
+
+module m_aisn 'modules/aml/applicationinsights.bicep' = {
+  name: 'deploy_appinsights'
+  scope: resourceGroup
+  params: {
+    location: location
+    applicationInsightsName:  !empty(applicationInsightsName) ? applicationInsightsName : '${abbrs.insightsComponents}${environmentName}-${uniqueSuffix}'
+    logAnalyticsWorkspaceId: m_loga.outputs.id
+  }
+}
+
+//11. Create Azure Container Registry
+//https://learn.microsoft.com/en-us/azure/templates/microsoft.machinelearningservices/workspaces?pivots=deployment-language-bicep
+module m_acr './modules/aml/acr.bicep' = {
+  name: 'deploy_acr'
+  scope: resourceGroup
+  params: {
+    location: location
+    acrName: !empty(acrName) ? acrName : '${abbrs.containerRegistryRegistries}${environmentName}${uniqueSuffix}'
+    acrSku: acrSku
+    tags: tags
+  }
+}
+
+// Dependent resources for the Azure Machine Learning workspace
+// module aiDependencies 'modules/ai/dependent-resources.bicep' = {
+//   name: 'dependencies-${name}-${uniqueSuffix}-deployment'
+//   params: {
+//     location: location
+//     storageName: 'st${name}${uniqueSuffix}'
+//     keyvaultName: 'kv-${name}-${uniqueSuffix}'
+//     applicationInsightsName: 'appi-${name}-${uniqueSuffix}'
+//     containerRegistryName: 'cr${name}${uniqueSuffix}'
+//     aiServicesName: 'ais${name}${uniqueSuffix}'
+//     tags: tags
+//   }
+// }
 
 //5. Create Create NSG
 module m_nsg 'modules/vnet/nsg.bicep' = {
@@ -407,100 +459,62 @@ module m_vm 'modules/vm/vm-ubuntu.bicep' = {
   ]
 }
 
-//10.A Create Log Analytics Workspace
-//https://learn.microsoft.com/en-us/azure/templates/microsoft.insights/components?pivots=deployment-language-bicep
-module m_loga 'modules/aml/loganalytics.bicep' = {
-  name: 'deploy_loganalytics'
-  scope: resourceGroup
-  params: {
-    location: location
-    logAnalyticsName: !useApplicationInsights ? '': !empty(logAnalyticsWorkspaceName) ? logAnalyticsWorkspaceName : '${abbrs.operationalInsightsWorkspaces}${resourceToken}'
-    tags: tags
-  }
-}
-
-//10.B Create Application Insights Instance
-//https://learn.microsoft.com/en-us/azure/templates/microsoft.insights/components?pivots=deployment-language-bicep
-
-module m_aisn 'modules/aml/applicationinsights.bicep' = {
-  name: 'deploy_appinsights'
-  scope: resourceGroup
-  params: {
-    location: location
-    applicationInsightsName:  !empty(applicationInsightsName) ? applicationInsightsName : '${abbrs.insightsComponents}${environmentName}-${uniqueSuffix}'
-    logAnalyticsWorkspaceId: m_loga.outputs.id
-  }
-}
-
-//11. Create Azure Container Registry
-//https://learn.microsoft.com/en-us/azure/templates/microsoft.machinelearningservices/workspaces?pivots=deployment-language-bicep
-module m_acr './modules/aml/acr.bicep' = {
-  name: 'deploy_acr'
-  scope: resourceGroup
-  params: {
-    location: location
-    acrName: !empty(acrName) ? acrName : '${abbrs.containerRegistryRegistries}${environmentName}${uniqueSuffix}'
-    acrSku: acrSku
-    tags: tags
-  }
-}
-
 //12. Create Azure Machine Learning Workspace
 //https://learn.microsoft.com/en-us/azure/templates/microsoft.machinelearningservices/workspaces?pivots=deployment-language-bicep
-module m_aml './modules/aml/azureml.bicep' = {
-  name: 'deploy_azureml'
-  scope: resourceGroup
-  params: {
-    location: location
-    aisnId: m_aisn.outputs.applicationInsightId
-    amlcompclustername: !empty(amlcompclustername) ? amlcompclustername : '${abbrs.machineLearningServicesCluster}${environmentName}-${uniqueSuffix}'
-    amlcompinstancename: !empty(amlcompinstancename) ? amlcompinstancename : '${abbrs.machineLearningServicesComputeCPU}${environmentName}-${uniqueSuffix}'
-    keyvaultId: m_kvn.outputs.keyVaultId
-    storageAccountId: m_stg.outputs.stgId
-    workspaceName: !empty(workspaceName) ? workspaceName : '${abbrs.machineLearningServicesWorkspaces}${environmentName}-${uniqueSuffix}'
-    hbi_workspace: hbi_workspace
-    acrId: m_acr.outputs.acrId
-    systemDatastoresAuthMode: ((systemDatastoresAuthMode == 'accessKey') ? systemDatastoresAuthMode : 'identity')
-    tags: tags
-  }
-}
+// module m_aml './modules/aml/azureml.bicep' = {
+//   name: 'deploy_azureml'
+//   scope: resourceGroup
+//   params: {
+//     location: location
+//     aisnId: m_aisn.outputs.applicationInsightId
+//     amlcompclustername: !empty(amlcompclustername) ? amlcompclustername : '${abbrs.machineLearningServicesCluster}${environmentName}-${uniqueSuffix}'
+//     amlcompinstancename: !empty(amlcompinstancename) ? amlcompinstancename : '${abbrs.machineLearningServicesComputeCPU}${environmentName}-${uniqueSuffix}'
+//     keyvaultId: m_kvn.outputs.keyVaultId
+//     storageAccountId: m_stg.outputs.stgId
+//     workspaceName: !empty(workspaceName) ? workspaceName : '${abbrs.machineLearningServicesWorkspaces}${environmentName}-${uniqueSuffix}'
+//     hbi_workspace: hbi_workspace
+//     acrId: m_acr.outputs.acrId
+//     systemDatastoresAuthMode: ((systemDatastoresAuthMode == 'accessKey') ? systemDatastoresAuthMode : 'identity')
+//     tags: tags
+//   }
+// }
 
 //********************************************************
 //Deployment Scripts
 //********************************************************
 //Attach a Kubernetes cluster to Azure Machine Learning workspace
-module script_attachK3sCluster './modules/aml/attachK3sCluster.bicep' = {
-  name: 'script_attachK3sCluster'
-  scope: resourceGroup
-  params: {
-    location: location
-    resourceGroupName: resourceGroup.name
-    amlworkspaceName: m_aml.outputs.amlworkspaceName
-    arcK8sClusterName: arcK8sClusterName
-    vmUserAssignedIdentityID: m_msi.outputs.msiID
-    vmUserAssignedIdentityPrincipalID: m_msi.outputs.msiPrincipalID
-  }
-  dependsOn:[
-    m_vm
-    m_aml
-  ]
-}
+// module script_attachK3sCluster './modules/aml/attachK3sCluster.bicep' = {
+//   name: 'script_attachK3sCluster'
+//   scope: resourceGroup
+//   params: {
+//     location: location
+//     resourceGroupName: resourceGroup.name
+//     amlworkspaceName: m_aml.outputs.amlworkspaceName
+//     arcK8sClusterName: arcK8sClusterName
+//     vmUserAssignedIdentityID: m_msi.outputs.msiID
+//     vmUserAssignedIdentityPrincipalID: m_msi.outputs.msiPrincipalID
+//   }
+//   dependsOn:[
+//     m_vm
+//     m_aml
+//   ]
+// }
 
 //Upload Notebooks to Azure ML Studio
-module script_UploadNotebooks './modules/aml/scriptNotebookUpload.bicep' = {
-  name: 'script_UploadNotebooks'
-  scope: resourceGroup
-  params: {
-    location: location
-    resourceGroupName: resourceGroup.name
-    amlworkspaceName: m_aml.outputs.amlworkspaceName
-    storageAccountName: m_stg.outputs.stgName
+// module script_UploadNotebooks './modules/aml/scriptNotebookUpload.bicep' = {
+//   name: 'script_UploadNotebooks'
+//   scope: resourceGroup
+//   params: {
+//     location: location
+//     resourceGroupName: resourceGroup.name
+//     amlworkspaceName: m_aml.outputs.amlworkspaceName
+//     storageAccountName: m_stg.outputs.stgName
 
-    vmUserAssignedIdentityID: m_msi.outputs.msiID 
-    vmUserAssignedIdentityPrincipalID: m_msi.outputs.msiPrincipalID 
-  }
-  dependsOn:[
-    m_msi
-    m_aml
-  ]
-}
+//     vmUserAssignedIdentityID: m_msi.outputs.msiID 
+//     vmUserAssignedIdentityPrincipalID: m_msi.outputs.msiPrincipalID 
+//   }
+//   dependsOn:[
+//     m_msi
+//     m_aml
+//   ]
+// }
