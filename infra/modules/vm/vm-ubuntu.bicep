@@ -3,9 +3,11 @@
       1 - Create NIC
       2 - Create VM
       3 - Assign Role to VM
-      4 - Create VM Extension
-      5 - Output NIC IP
-      6 - Output Untrusted NIC Profile ID
+      4 - Grab AI Services Account Key
+      5 - Create VM Extension
+      6 - Output NIC IP
+      7 - Output Untrusted NIC Profile ID
+      8 - Output VM Principal ID
 */
 
 //Declare Parameters--------------------------------------------------------------------------------------------------------------------------
@@ -38,6 +40,12 @@ param scriptURI string
 param ShellScriptName string
 
 param customLocationRPSPID string
+
+@description('Name of the AI Services account')
+param aiServicesName string
+@description('Resource ID of the AI Services endpoint')
+param aiServicesEndpoint string
+
 
 var osDiskType = 'Premium_LRS'
 
@@ -182,6 +190,10 @@ module roleOwner '../identity/role.bicep' = {
   }
 }
 
+resource cognitiveServices 'Microsoft.CognitiveServices/accounts@2023-05-01' existing = {
+  name: aiServicesName
+}
+
 resource vmext 'Microsoft.Compute/virtualMachines/extensions@2023-09-01' = {
   parent: vm
   name: 'installscript_k3s'
@@ -195,7 +207,7 @@ resource vmext 'Microsoft.Compute/virtualMachines/extensions@2023-09-01' = {
       fileUris: [
         '${scriptURI}${ShellScriptName}'
       ]
-      commandToExecute: 'sh ${ShellScriptName} ${resourceGroup().name} ${arcK8sClusterName} ${location} ${adminUsername} ${vmUserAssignedIdentityPrincipalID} ${customLocationRPSPID} ${keyVaultId} ${keyVaultName} ${subscription().subscriptionId} ${spAppId} ${spSecret} ${subscription().tenantId} ${spObjectId} ${spAppObjectId}'
+      commandToExecute: 'sh ${ShellScriptName} ${resourceGroup().name} ${arcK8sClusterName} ${location} ${adminUsername} ${vmUserAssignedIdentityPrincipalID} ${customLocationRPSPID} ${keyVaultId} ${keyVaultName} ${subscription().subscriptionId} ${spAppId} ${spSecret} ${subscription().tenantId} ${spObjectId} ${spAppObjectId} ${aiServicesEndpoint} ${cognitiveServices.listKeys().key1}'
     }
   }
   dependsOn: [

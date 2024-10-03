@@ -31,7 +31,7 @@ param storageAccountId string
 param aiServicesId string
 
 @description('Resource ID of the AI Services endpoint')
-param aiServicesTarget string
+param aiServicesEndpoint string
 
 resource aiHub 'Microsoft.MachineLearningServices/workspaces@2023-08-01-preview' = {
   name: aiHubName
@@ -57,7 +57,7 @@ resource aiHub 'Microsoft.MachineLearningServices/workspaces@2023-08-01-preview'
     name: '${aiHubName}-connection-AzureOpenAI'
     properties: {
       category: 'AzureOpenAI'
-      target: aiServicesTarget
+      target: aiServicesEndpoint
       authType: 'ApiKey'
       isSharedToAll: true
       credentials: {
