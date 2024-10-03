@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rag-on-edge-simulator
+  namespace: cerebral
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rag-on-edge-simulator
+  template:
+    metadata:
+      labels:
+        app: rag-on-edge-simulator
+    spec:
+      containers:
+      - name: rag-on-edge-simulator
+        image: agoraarmbladev.azurecr.io/rag-on-edge-simulator:1.2
+        ports:
+        - containerPort: 5000
+        env:
+        - name: INFLUXDB_URL
+          value: "http://influxdb.cerebral.svc.cluster.local:8086"
+        - name: INFLUXDB_TOKEN
+          value: "secret-token"
+        - name: INFLUXDB_ORG
+          value: "InfluxData"
+        - name: INFLUXDB_BUCKET
+          value: "manufacturing"
+        - name: VERBOSE
+          value: "true"

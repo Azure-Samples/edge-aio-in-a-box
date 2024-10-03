@@ -17,6 +17,8 @@
 # $12 = Azure Service Principal Tenant ID
 # $13 = Azure Service Principal Object ID
 # $14 = Azure Service Principal App Object ID
+# $15 = Azure AI Service Endpoint
+# $16 = Azure AI Service Key
 
 #  1   ${resourceGroup().name}
 #  2   ${arcK8sClusterName}
@@ -32,6 +34,8 @@
 #  12  ${subscription().tenantId}'
 #  13  ${spObjectId}
 #  14  ${spAppObjectId}
+#  15  ${aiservicesTarget}
+#  16  ${aiservicesKey}
 
 sudo apt-get update
 
@@ -49,6 +53,8 @@ spSecret=${11}
 tenantId=${12}
 spObjectId=${13}
 spAppObjectId=${14}
+aiservicesTarget=${15}
+aiservicesKey=${16}
 
 
 #############################
@@ -69,6 +75,8 @@ echo "   spSecret: $spSecret"
 echo "   tenantId: $tenantId"
 echo "   spObjectId: $spObjectId"
 echo "   spAppObjectId: $spAppObjectId"
+echo "   aiservicesTarget: $aiservicesTarget"
+echo "   aiservicesKey: $aiservicesKey"
 
 # Injecting environment variables
 logpath=/var/log/deploymentscriptlog
@@ -185,29 +193,29 @@ az connectedk8s enable-features -g $rg \
 #--Data Processors is included in the IoT Operations deployment. https://learn.microsoft.com/en-us/azure/iot-operations/process-data/overview-data-processor
 
 echo "Deploy Azure IoT Operations - Configure and deploy IoT Operations to the target Arc-enabled Cluster"
-az iot ops init -g $rg \
-    --cluster $arcK8sClusterName \
-    --kv-id $keyVaultId \
-    --sp-app-id  $spAppId \
-    --sp-object-id $spObjectId \
-    --sp-secret $spSecret \
-    --kubernetes-distro k3s \
-    --simulate-plc 
+# az iot ops init -g $rg \
+#     --cluster $arcK8sClusterName \
+#     --kv-id $keyVaultId \
+#     --sp-app-id  $spAppId \
+#     --sp-object-id $spObjectId \
+#     --sp-secret $spSecret \
+#     --kubernetes-distro k3s \
+#     --simulate-plc 
 
 #############################
 #Arc for Kubernetes AML Extension
 #############################
 #https://learn.microsoft.com/en-us/azure/machine-learning/how-to-deploy-kubernetes-extension
-allowInsecureConnections=True - Allow HTTP communication or not. HTTP communication is not a secure way. If not allowed, HTTPs will be used.
-InferenceRouterHA=False       - By default, AzureML extension will deploy 3 ingress controller replicas for high availability, which requires at least 3 workers in a cluster. Set this to False if you have less than 3 workers and want to deploy AzureML extension for development and testing only, in this case it will deploy one ingress controller replica only.
-az k8s-extension create \
-    -g $rg \
-    -c $arcK8sClusterName \
-    -n azureml \
-    --cluster-type connectedClusters \
-    --extension-type Microsoft.AzureML.Kubernetes \
-    --scope cluster \
-    --config enableTraining=False enableInference=True allowInsecureConnections=True inferenceRouterServiceType=loadBalancer inferenceRouterHA=False autoUpgrade=True installNvidiaDevicePlugin=False installPromOp=False installVolcano=False installDcgmExporter=False --auto-upgrade true --verbose # This is since our K3s is 1 node
+# allowInsecureConnections=True - Allow HTTP communication or not. HTTP communication is not a secure way. If not allowed, HTTPs will be used.
+# InferenceRouterHA=False       - By default, AzureML extension will deploy 3 ingress controller replicas for high availability, which requires at least 3 workers in a cluster. Set this to False if you have less than 3 workers and want to deploy AzureML extension for development and testing only, in this case it will deploy one ingress controller replica only.
+# az k8s-extension create \
+#     -g $rg \
+#     -c $arcK8sClusterName \
+#     -n azureml \
+#     --cluster-type connectedClusters \
+#     --extension-type Microsoft.AzureML.Kubernetes \
+#     --scope cluster \
+#     --config enableTraining=False enableInference=True allowInsecureConnections=True inferenceRouterServiceType=loadBalancer inferenceRouterHA=False autoUpgrade=True installNvidiaDevicePlugin=False installPromOp=False installVolcano=False installDcgmExporter=False --auto-upgrade true --verbose # This is since our K3s is 1 node
 
 
 #############################
@@ -244,38 +252,40 @@ sleep 30
 wget -P /home/$adminUsername/cerebral https://raw.githubusercontent.com/Azure/arc_jumpstart_drops/main/sample_app/cerebral_genai/deployment/cerebral.yaml
 
 #Update the Cerebral application deployment file with the Azure OpenAI endpoint
-sed -i 's/<YOUR_OPENAI>/65b22c3cec9d449e881b54efc91e0db3/g' /home/$adminUsername/cerebral/cerebral.yaml
-sed -i 's#<AZURE OPEN AI ENDPOINT>#https://aistdioserviceeast.openai.azure.com/#g' /home/$adminUsername/cerebral/cerebral.yaml
+# sed -i 's/<YOUR_OPENAI>/65b22c3cec9d449e881b54efc91e0db3/g' /home/$adminUsername/cerebral/cerebral.yaml
+sed -i "s/<YOUR_OPENAI>/${aiservicesKey}/g" /home/$adminUsername/cerebral/cerebral.yaml
+# sed -i 's#<AZURE OPEN AI ENDPOINT>#https://aistdioserviceeast.openai.azure.com/#g' /home/$adminUsername/cerebral/cerebral.yaml
+sed -i "s#<AZURE OPEN AI ENDPOINT>#${aiservicesTarget}#g" /home/$adminUsername/cerebral/cerebral.yaml
 # sed -i 's/2024-03-01-preview/2024-03-15-preview/g' /home/$adminUsername/cerebral/cerebral.yaml
 
 kubectl apply -f /home/$adminUsername/cerebral/cerebral.yaml
 sleep 30
 
 #Install Dapr runtime on the cluster
-helm repo add dapr https://dapr.github.io/helm-charts/
-helm repo update
-helm upgrade --install dapr dapr/dapr --version=1.11 --namespace dapr-system --create-namespace --wait
-sleep 30
+# helm repo add dapr https://dapr.github.io/helm-charts/
+# helm repo update
+# helm upgrade --install dapr dapr/dapr --version=1.11 --namespace dapr-system --create-namespace --wait
+# sleep 30
 
-#Creating the ML workload namespace
-#https://medium.com/@jmasengesho/azure-machine-learning-service-for-kubernetes-architects-deploy-your-first-model-on-aks-with-az-440ada47b4a0
-#When creating the Azure ML Extension we do not all the ML workloads and models we create later on on the same namespace as the Azure ML Extension.
-#We create a separate namespace for the ML workloads and models.
-kubectl create namespace azureml-workloads
-kubectl get all -n azureml-workloads
+# #Creating the ML workload namespace
+# #https://medium.com/@jmasengesho/azure-machine-learning-service-for-kubernetes-architects-deploy-your-first-model-on-aks-with-az-440ada47b4a0
+# #When creating the Azure ML Extension we do not all the ML workloads and models we create later on on the same namespace as the Azure ML Extension.
+# #We create a separate namespace for the ML workloads and models.
+# kubectl create namespace azureml-workloads
+# kubectl get all -n azureml-workloads
 
-#Deploy Azure IoT MQ - Dapr PubSub Components
-#rag-on-edge-pubsub-broker: a pub/sub message broker for message passing between the components.
-kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/edge-aio-in-a-box/main/rag-on-edge/yaml/rag-mq-components-aio0p6.yaml
+# #Deploy Azure IoT MQ - Dapr PubSub Components
+# #rag-on-edge-pubsub-broker: a pub/sub message broker for message passing between the components.
+# kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/edge-aio-in-a-box/main/rag-on-edge/yaml/rag-mq-components-aio0p6.yaml
 
-#rag-on-edge-web: a web application to interact with the user to submit the search and generation query.
-kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/edge-aio-in-a-box/main/rag-on-edge/yaml/rag-web-workload-aio0p6-acrairstream.yaml
+# #rag-on-edge-web: a web application to interact with the user to submit the search and generation query.
+# kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/edge-aio-in-a-box/main/rag-on-edge/yaml/rag-web-workload-aio0p6-acrairstream.yaml
 
-#rag-on-edge-interface: an interface module to interact with web frontend and the backend components.
-kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/edge-aio-in-a-box/main/rag-on-edge/yaml/rag-interface-dapr-workload-aio0p6-acrairstream.yaml
+# #rag-on-edge-interface: an interface module to interact with web frontend and the backend components.
+# kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/edge-aio-in-a-box/main/rag-on-edge/yaml/rag-interface-dapr-workload-aio0p6-acrairstream.yaml
 
-#rag-on-edge-vectorDB: a database to store the vectors. 
-kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/edge-aio-in-a-box/main/rag-on-edge/yaml/rag-vdb-dapr-workload-aio0p6-acr-airstream.yaml
+# #rag-on-edge-vectorDB: a database to store the vectors. 
+# kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/edge-aio-in-a-box/main/rag-on-edge/yaml/rag-vdb-dapr-workload-aio0p6-acr-airstream.yaml
 
-#rag-on-edge-LLM: a large language model (LLM) to generate the response based on the vector search result.
-kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/edge-aio-in-a-box/main/rag-on-edge/yaml/rag-llm-dapr-workload-aio0p6-acrairstream.yaml
+# #rag-on-edge-LLM: a large language model (LLM) to generate the response based on the vector search result.
+# kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/edge-aio-in-a-box/main/rag-on-edge/yaml/rag-llm-dapr-workload-aio0p6-acrairstream.yaml
