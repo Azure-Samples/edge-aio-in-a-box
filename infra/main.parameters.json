@@ -26,12 +26,6 @@
     "arcK8sClusterName": {
       "value": "${AZURE_ENV_ARCK8SCLUSTERNAME}"
     },
-    "scriptURI": {
-      "value": "${AZURE_ENV_SCRIPTURI}"
-    },
-    "ShellScriptName": {
-      "value": "${AZURE_ENV_SHELLSCRIPTNAME}"
-    },
     "customLocationRPSPID":{
       "value": "${AZURE_ENV_CUSTOMLOCATIONRPSPID}"
     },

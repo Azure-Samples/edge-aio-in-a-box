@@ -112,20 +112,16 @@ param adminPasswordOrKey string
 
 @description('Type of authentication to use on the Virtual Machine. SSH key is recommended.')
 @allowed([
-  'sshPublicKey'
   'password'
 ])
 param authenticationType string
 
 
-@sys.description('URI for Custom K3s VM Script and Config')
-//param scriptURI string = 'https://raw.githubusercontent.com/Azure/AI-in-a-Box/AIO-with-AI/edge-ai/AIO-with-AI/scripts/'
-param scriptURI string
+@sys.description('URI for K3s VM Configuraiton Script')
+param scriptURI string = 'https://github.com/Azure-Samples/edge-aio-in-a-box/blob/main/scripts/'
 
 @sys.description('Shell Script to be executed')
-//param ShellScriptName string = 'script.sh'
-param ShellScriptName string
-
+param ShellScriptName string = 'azd_configureK3s.sh'
 
 @sys.description('Custom Locations RP ObjectID')
 param customLocationRPSPID string = ''
