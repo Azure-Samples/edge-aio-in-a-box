@@ -161,7 +161,7 @@ sleep 60
 # Reference: https://learn.microsoft.com/en-us/azure/iot-operations/deploy-iot-ops/howto-prepare-cluster?tabs=ubuntu#create-a-cluster
 # Reference: https://learn.microsoft.com/en-us/cli/azure/iot/ops?view=azure-cli-latest#az-iot-ops-init
 echo "Deploy IoT Operations Components"
-az extension add --upgrade --name azure-iot-ops --allow-preview true --yes
+az extension add --name azure-iot-ops --allow-preview true --version 0.6.0b4 --yes 
 
 #Increase user watch/instance limits:
 echo fs.inotify.max_user_instances=8192 | sudo tee -a /etc/sysctl.conf
