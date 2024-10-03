@@ -89,23 +89,34 @@ This deployment accelerator contains a minimal AIO (Azure IoT Operations/Kuberne
 ## Deploy to Azure
 1. Clone this repository locally: 
 
-    ```
+    ```bash
     git clone https://github.com/Azure-Samples/edge-aio-in-a-box
     ```
 
 1. Log into your Azure subscription  (both are required): 
-    ```
+    ```bash
     azd auth login --use-device-code --tenant-id xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxx
     ```
-    ```
+    ```bash
     az login --use-device-code --tenant xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxx
     ```
 
 1. Deploy resources:
-    ```
+    ```bash
     azd up
     ```
-    You will be prompted for a subcription, region and additional parameters.
+
+    You will be prompted for a subcription, region and additional parameters:
+
+    ```bash
+        adminPasswordOrKey - Pa$$W0rd:)7:)7
+        adminUsername - ArcAdmin
+        arcK8sClusterName - aioxclusterYOURINITIALS
+        authenticationType - password
+        location - eastus
+        virtualMachineName - aiobxclustervmYOURINITIALS
+        virtualMachineSize - Standard_D16s_v4
+    ```
 
 
 ## Post Deployment
