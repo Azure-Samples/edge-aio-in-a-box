@@ -200,7 +200,4 @@ az iot ops schema registry create -g $rg -n $SCHEMA_REGISTRY --registry-namespac
 
 az iot ops init -g $rg --cluster $arcK8sClusterName --sr-resource-id $(az iot ops schema registry show --name $SCHEMA_REGISTRY --resource-group $rg -o tsv --query id)
 
-az iot ops create -g $rg \
-  --cluster $arcK8sClusterName \
-  --custom-location "${arcK8sClusterName}-cl-2637" \
-  -n "${arcK8sClusterName}-ops-instance"
+az iot ops create -g $rg --cluster $arcK8sClusterName --custom-location "${arcK8sClusterName}-cl-2637" -n "${arcK8sClusterName}-ops-instance"
