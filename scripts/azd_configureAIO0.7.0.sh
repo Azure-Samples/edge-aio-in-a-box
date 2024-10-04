@@ -191,13 +191,13 @@ az connectedk8s enable-features -g $rg \
     --custom-locations-oid $customLocationRPSPID \
     --features cluster-connect custom-locations
 
-$SCHEMA_REGISTRY="aiobxregistry"
-$SCHEMA_REGISTRY_NAMESPACE="aiobxregistryns"
+$SCHEMA_REGISTRY="aiobxregistry1"
+$SCHEMA_REGISTRY_NAMESPACE="aiobxregistryns1"
 
 # az iot ops schema registry create -g $rg -n $SCHEMA_REGISTRY --registry-namespace $SCHEMA_REGISTRY_NAMESPACE --sa-resource-id $(az storage account show --name $STORAGE_ACCOUNT -o tsv --query id)
 # az iot ops schema registry create -g aiobxap070-aioedgeai-rg -n aiobxregistry --registry-namespace aiobxregistryns --sa-resource-id /subscriptions/22c140ff-ca30-4d58-9223-08a6041970ab/resourceGroups/aiobxap070-aioedgeai-rg/providers/Microsoft.Storage/storageAccounts/staiobxapi66hns --sa-container schema
 az iot ops schema registry create -g $rg -n $SCHEMA_REGISTRY --registry-namespace $SCHEMA_REGISTRY_NAMESPACE --sa-resource-id $stgId --sa-container schemas
 
-az iot ops init -g $rg --cluster $arcK8sClusterName --sr-resource-id $(az iot ops schema registry show --name $SCHEMA_REGISTRY --resource-group $rg -o tsv --query id)
+# az iot ops init -g $rg --cluster $arcK8sClusterName --sr-resource-id $(az iot ops schema registry show --name $SCHEMA_REGISTRY --resource-group $rg -o tsv --query id)
 
-az iot ops create -g $rg --cluster $arcK8sClusterName --custom-location "${arcK8sClusterName}-cl-2637" -n "${arcK8sClusterName}-ops-instance"
+# az iot ops create -g $rg --cluster $arcK8sClusterName --custom-location "${arcK8sClusterName}-cl-2637" -n "${arcK8sClusterName}-ops-instance"
