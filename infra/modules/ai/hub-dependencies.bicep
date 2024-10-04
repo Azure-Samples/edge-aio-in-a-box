@@ -13,16 +13,18 @@ param aiServicesName string
 @description('Array of OpenAI model deployments')
 param openAiModelDeployments array = []
 
-module cognitiveServices '../ai/cognitiveservices.bicep' = {
+module aiServices '../ai/cognitiveservices.bicep' = {
   name: 'cognitiveServices'
   params: {
     location: location
-    name: aiServicesName
-    kind: 'OpenAI'
+    aiServicesName: aiServicesName
+    kind: 'AIServices'
     deployments: openAiModelDeployments
+    authMode: 'accessKey'
   }
 }
 
-output openAiId string = cognitiveServices.outputs.id
-output openAiName string = cognitiveServices.outputs.name
-output openAiEndpoint string = cognitiveServices.outputs.endpoints['OpenAI Language Model Instance API']
+output openAiId string = aiServices.outputs.id
+output openAiName string = aiServices.outputs.name
+output openAiEndpoint string = aiServices.outputs.endpoint
+output openAiEndpoints string = aiServices.outputs.endpoints['OpenAI Language Model Instance API']
