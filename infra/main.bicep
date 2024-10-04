@@ -102,7 +102,6 @@ param virtualMachineName string
 @sys.description('Arc for Kubernates Cluster Name')
 param arcK8sClusterName string
 
-
 @description('Username for the Virtual Machine.')
 param adminUsername string
 
@@ -129,7 +128,6 @@ param customLocationRPSPID string = ''
 
 //Storage Account
 var storageAccountName = ''
-var storageContainerName = 'aio'
 
 //Log Analytics Workspace
 @description('The log analytics workspace name. If ommited will be generated')
@@ -144,7 +142,7 @@ param acrName string = ''
 @description('The SKU to use for the Azure Container Registry.')
 param acrSku string = 'Standard'
 
-// Parameters
+//AI Studio Hub
 @minLength(2)
 @maxLength(12)
 @description('Name for the AI resource and used to derive name of dependent resources.')
@@ -481,7 +479,7 @@ module m_vm 'modules/vm/vm-ubuntu.bicep' = {
     spSecret: spSecret
     spObjectId: spObjectId
     spAppObjectId: spAppObjectId
-    aiServicesEndpoint: aiDependencies.outputs.openAiEndpoint
+    aiServicesEndpoint: aiDependencies.outputs.openAiEndpoints
     aiServicesName: aiDependencies.outputs.openAiName
   }
   dependsOn: [
@@ -492,8 +490,8 @@ module m_vm 'modules/vm/vm-ubuntu.bicep' = {
   ]
 }
 
-15. Create Azure Machine Learning Workspace
-https://learn.microsoft.com/en-us/azure/templates/microsoft.machinelearningservices/workspaces?pivots=deployment-language-bicep
+//15. Create Azure Machine Learning Workspace
+//https://learn.microsoft.com/en-us/azure/templates/microsoft.machinelearningservices/workspaces?pivots=deployment-language-bicep
 module m_aml './modules/aml/azureml.bicep' = {
   name: 'deploy_azureml'
   scope: resourceGroup
@@ -512,10 +510,10 @@ module m_aml './modules/aml/azureml.bicep' = {
   }
 }
 
-********************************************************
-Deployment Scripts
-********************************************************
-Attach a Kubernetes cluster to Azure Machine Learning workspace
+// ********************************************************
+// Deployment Scripts
+// ********************************************************
+// Attach a Kubernetes cluster to Azure Machine Learning workspace
 module script_attachK3sCluster './modules/aml/attachK3sCluster.bicep' = {
   name: 'script_attachK3sCluster'
   scope: resourceGroup
@@ -533,7 +531,7 @@ module script_attachK3sCluster './modules/aml/attachK3sCluster.bicep' = {
   ]
 }
 
-Upload Notebooks to Azure ML Studio
+// Upload Notebooks to Azure ML Studio
 module script_UploadNotebooks './modules/aml/scriptNotebookUpload.bicep' = {
   name: 'script_UploadNotebooks'
   scope: resourceGroup

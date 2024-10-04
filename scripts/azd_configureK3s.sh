@@ -75,7 +75,7 @@ echo "   spSecret: $spSecret"
 echo "   tenantId: $tenantId"
 echo "   spObjectId: $spObjectId"
 echo "   spAppObjectId: $spAppObjectId"
-echo "   aiservicesTarget: $aiServicesEndpoint"
+echo "   aiServicesEndpoint: $aiServicesEndpoint"
 echo "   aiservicesKey: $aiservicesKey"
 
 # Injecting environment variables
@@ -255,7 +255,7 @@ wget -P /home/$adminUsername/cerebral https://raw.githubusercontent.com/Azure/ar
 # sed -i 's/<YOUR_OPENAI>/THISISYOURAISERVICESKEY/g' /home/$adminUsername/cerebral/cerebral.yaml
 sed -i "s/<YOUR_OPENAI>/${aiservicesKey}/g" /home/$adminUsername/cerebral/cerebral.yaml
 # sed -i 's#<AZURE OPEN AI ENDPOINT>#https://aistdioserviceeast.openai.azure.com/#g' /home/$adminUsername/cerebral/cerebral.yaml
-sed -i "s#<AZURE OPEN AI ENDPOINT>#${aiservicesTarget}#g" /home/$adminUsername/cerebral/cerebral.yaml
+sed -i "s#<AZURE OPEN AI ENDPOINT>#${aiServicesEndpoint}#g" /home/$adminUsername/cerebral/cerebral.yaml
 # sed -i 's/2024-03-01-preview/2024-03-15-preview/g' /home/$adminUsername/cerebral/cerebral.yaml
 
 kubectl apply -f /home/$adminUsername/cerebral/cerebral.yaml
