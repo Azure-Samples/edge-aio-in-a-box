@@ -65,11 +65,12 @@ azd env set AZURE_ENV_CUSTOMLOCATIONRPSPID $customLocationRPSPID
 # Create a service principal used by IoT Operations to interact with Key Vault
 ###################
 echo "Creating a service principal for IoT Operations to interact with Key Vault..."
-iotOperationsKeyVaultSP=$(az ad sp create-for-rbac --name "aiobx-keyvault-sp" --role "Owner" --scopes /subscriptions/$AZURE_SUBSCRIPTION_ID)
-spAppId=$(echo $iotOperationsKeyVaultSP | jq -r '.appId')
-spSecret=$(echo $iotOperationsKeyVaultSP | jq -r '.password')
+iotOperationsKeyVaultSP=$(az ad sp create-for-rbac --name "aiobx-keyvault-sp" --role "Owner" --scopes /subscriptions/$AZURE_SUBSCRIPTION_ID  -o tsv --query '[appId, password]')
+spAppId=$(echo $iotOperationsKeyVaultSP | cut -d' ' -f1)
+spSecret=$(echo $iotOperationsKeyVaultSP | cut -d' ' -f2)
+
 spobjId=$(az ad sp show --id $spAppId --query id -o tsv)
-spAppObjId = $(az ad app show --id $spAppId --query id -o tsv)
+spAppObjId=$(az ad app show --id $spAppId --query id -o tsv)
 
 echo "Setting the service principal environment variables..."
 azd env set AZURE_ENV_SPAPPID $spAppId
