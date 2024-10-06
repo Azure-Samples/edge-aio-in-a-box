@@ -100,7 +100,7 @@ param authenticationType string
 param scriptURI string = 'https://raw.githubusercontent.com/Azure-Samples/edge-aio-in-a-box/main/scripts/'
 
 @sys.description('Shell Script to be executed')
-param ShellScriptName string = 'azd_configureAIO-0.6.sh'
+param ShellScriptName string = 'azd_configureAIO-0.7.sh'
 
 @sys.description('Custom Locations RP ObjectID')
 param customLocationRPSPID string = ''
