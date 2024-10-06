@@ -19,6 +19,7 @@
 # $14 = Azure Service Principal App Object ID
 # $15 = Azure AI Service Endpoint
 # $16 = Azure AI Service Key
+# $17 = Azure Storage Resource ID
 
 #  1   ${resourceGroup().name}
 #  2   ${arcK8sClusterName}
@@ -36,6 +37,7 @@
 #  14  ${spAppObjectId}
 #  15  ${aiServicesEndpoint}
 #  16  ${aiservicesKey}
+#  17  ${stgId}
 
 sudo apt-get update
 
@@ -55,7 +57,7 @@ spObjectId=${13}
 spAppObjectId=${14}
 aiServicesEndpoint=${15}
 aiservicesKey=${16}
-
+stgId=${17}
 
 #############################
 # Script Definition
@@ -77,6 +79,7 @@ echo "   spObjectId: $spObjectId"
 echo "   spAppObjectId: $spAppObjectId"
 echo "   aiServicesEndpoint: $aiServicesEndpoint"
 echo "   aiservicesKey: $aiservicesKey"
+echo "   stgId: $stgId"
 
 # Injecting environment variables
 logpath=/var/log/deploymentscriptlog
