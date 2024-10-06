@@ -173,7 +173,7 @@ sleep 60
 # Reference: https://learn.microsoft.com/en-us/cli/azure/iot/ops?view=azure-cli-latest#az-iot-ops-init
 echo "Deploy IoT Operations Components"
 # az extension add --name azure-iot-ops --allow-preview true --yes 
-az extension add -name azure-iot-ops --upgrade --yes
+
 
 #Increase user watch/instance limits:
 echo fs.inotify.max_user_instances=8192 | sudo tee -a /etc/sysctl.conf
@@ -194,24 +194,22 @@ az connectedk8s enable-features -g $rg \
 
 echo "Create a schema registry which will be used by Azure IoT Operations components after the deployment and connects it to the Azure Storage account."
 
-$SCHEMA_REGISTRY="aiobxregistry2"
-$SCHEMA_REGISTRY_NAMESPACE="aiobxregistryns2"
+SCHEMA_REGISTRY="aiobxregistry2"
+SCHEMA_REGISTRY_NAMESPACE="aiobxregistryns2"
 
+az extension add -name azure-iot-ops --upgrade --yes --allow-preview false
 # az iot ops schema registry create -g $rg -n $SCHEMA_REGISTRY --registry-namespace $SCHEMA_REGISTRY_NAMESPACE --sa-resource-id $(az storage account show --name $STORAGE_ACCOUNT -o tsv --query id) --sa-container schemas
 # 2 az iot ops schema registry create -g $rg -n $SCHEMA_REGISTRY --registry-namespace $SCHEMA_REGISTRY_NAMESPACE --sa-resource-id $(az storage account show --name staiobxapi66hns -o tsv --query id) --sa-container schemas
 #az iot ops schema registry create -g $rg -n $SCHEMA_REGISTRY --registry-namespace $SCHEMA_REGISTRY_NAMESPACE --sa-resource-id $stgId --sa-container schemas
-az iot ops schema registry create -g aiobxap070-aioedgeai-rg -n aiobxregistry1 --registry-namespace aiobxregistryns1 --sa-resource-id /subscriptions/22c140ff-ca30-4d58-9223-08a6041970ab/resourceGroups/aiobxap070-aioedgeai-rg/providers/Microsoft.Storage/storageAccounts/staiobxapi66hns --sa-container schemas
+az iot ops schema registry create -g aiobxap070-aioedgeai-rg -n aiobxregistry1 --registry-namespace aiobxregistryns1 --sa-resource-id "/subscriptions/22c140ff-ca30-4d58-9223-08a6041970ab/resourceGroups/aiobxap070-aioedgeai-rg/providers/Microsoft.Storage/storageAccounts/staiobxapi66hns" --sa-container schemas
 
 
 echo "Prepare the cluster for Azure IoT Operations deployment."
 # az iot ops init -g $rg --cluster $arcK8sClusterName --sr-resource-id $(az iot ops schema registry show --name $SCHEMA_REGISTRY --resource-group $rg -o tsv --query id)
-
 # az iot ops create -g $rg --cluster $arcK8sClusterName --custom-location "${arcK8sClusterName}-cl-2637" -n "${arcK8sClusterName}-ops-instance"
-
 #az iot ops schema registry show --name aiobxregistry1 --resource-group aiobxap070-aioedgeai-rg -o tsv --query id
-
 #az iot ops init -g aiobxap070-aioedgeai-rg --cluster aiobmclusterap --sr-resource-id /subscriptions/22c140ff-ca30-4d58-9223-08a6041970ab/resourceGroups/aiobxap070-aioedgeai-rg/providers/Microsoft.DeviceRegistry/schemaRegistries/aiobxregistry1
 
 
-echo "Deploy Azure IoT Operations.
+echo "Deploy Azure IoT Operations."
 # az iot ops create -g aiobxap070-aioedgeai-rg  --cluster aiobmclusterap  --custom-location aiobmclusterap-cl-7199  -n aiobmclusterap-ops-instance
