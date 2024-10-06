@@ -171,7 +171,7 @@ sleep 60
 # Starting off the post deployment steps. The following steps are to deploy Azure IoT Operations components
 # Reference: https://learn.microsoft.com/en-us/azure/iot-operations/deploy-iot-ops/howto-prepare-cluster?tabs=ubuntu#create-a-cluster
 # Reference: https://learn.microsoft.com/en-us/cli/azure/iot/ops?view=azure-cli-latest#az-iot-ops-init
-echo "Deploy IoT Operations Components"
+echo "Deploy IoT Operations Components. These commands take several minutes to complete."
 
 #Increase user watch/instance limits:
 echo fs.inotify.max_user_instances=8192 | sudo tee -a /etc/sysctl.conf
@@ -190,8 +190,6 @@ az connectedk8s enable-features -g $rg \
     --custom-locations-oid $customLocationRPSPID \
     --features cluster-connect custom-locations
 
-#Deploy Azure IoT Operations. These commands take several minutes to complete.
-echo "Create a schema registry which will be used by Azure IoT Operations components after the deployment and connects it to the Azure Storage account."
 # Initial values for variables
 SCHEMA_REGISTRY="aiobxregistry"
 SCHEMA_REGISTRY_NAMESPACE="aiobxregistryns"
@@ -205,16 +203,22 @@ SCHEMA_REGISTRY_NAMESPACE="${SCHEMA_REGISTRY_NAMESPACE}${SUFFIX}"
 
 az extension add -name azure-iot-ops --upgrade --yes --allow-preview false
 
-az iot ops schema registry create -g $rg -n $SCHEMA_REGISTRY --registry-namespace $SCHEMA_REGISTRY_NAMESPACE --sa-resource-id "${stgId}" --sa-container schemas
+echo "Create a schema registry which will be used by Azure IoT Operations components after the deployment and connects it to the Azure Storage account."
 # az iot ops schema registry create -g $rg -n $SCHEMA_REGISTRY --registry-namespace $SCHEMA_REGISTRY_NAMESPACE --sa-resource-id $(az storage account show --name $STORAGE_ACCOUNT -o tsv --query id) --sa-container schemas
+az iot ops schema registry create -g $rg -n $SCHEMA_REGISTRY --registry-namespace $SCHEMA_REGISTRY_NAMESPACE --sa-resource-id "${stgId}" --sa-container schemas
 
 echo "Prepare the cluster for Azure IoT Operations deployment."
 #az iot ops schema registry show --name aiobxregistry1 --resource-group aiobxap070-aioedgeai-rg -o tsv --query id
 #az iot ops init -g aiobxap070-aioedgeai-rg --cluster aiobmclusterap --sr-resource-id "/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxx/resourceGroups/aiobxap070-aioedgeai-rg/providers/Microsoft.DeviceRegistry/schemaRegistries/aiobxregistry1"
-az iot ops init -g $rg --cluster $arcK8sClusterName --sr-resource-id "$(az iot ops schema registry show --name $SCHEMA_REGISTRY --resource-group $rg -o tsv --query id)"
+az iot ops init -g $rg \
+    --cluster $arcK8sClusterName \
+    --sr-resource-id "$(az iot ops schema registry show --name $SCHEMA_REGISTRY --resource-group $rg -o tsv --query id)"
 
 echo "Deploy Azure IoT Operations."
-az iot ops create -g $rg --cluster $arcK8sClusterName --custom-location "${arcK8sClusterName}-cl-${SUFFIX}" -n "${arcK8sClusterName}-ops-instance"
+az iot ops create -g $rg \
+    --cluster $arcK8sClusterName \
+    --custom-location "${arcK8sClusterName}-cl-${SUFFIX}" \
+    -n "${arcK8sClusterName}-ops-instance"
 
 
 #############################
@@ -252,8 +256,35 @@ kubectl apply -f https://raw.githubusercontent.com/Azure/arc_jumpstart_drops/mai
 sleep 30
 kubectl apply -f https://raw.githubusercontent.com/Azure/arc_jumpstart_drops/main/sample_app/cerebral_genai/deployment/influxdb-setup.yaml
 sleep 30
+kubectl apply -f https://raw.githubusercontent.com/Azure/arc_jumpstart_drops/main/sample_app/cerebral_genai/deployment/cerebral-simulator.yaml
+sleep 30
+
 #Validate the implementation
 kubectl get all -n cerebral
+
+#Deploy Redis to store user sessions and conversation history
+kubectl apply -f https://raw.githubusercontent.com/Azure/arc_jumpstart_drops/main/sample_app/cerebral_genai/deployment/redis.yaml
+
+#Deploy Cerebral Application
+#Download the Cerebral application deployment file
+sleep 30
+wget -P /home/$adminUsername/cerebral https://raw.githubusercontent.com/Azure/arc_jumpstart_drops/main/sample_app/cerebral_genai/deployment/cerebral.yaml
+
+#Update the Cerebral application deployment file with the Azure OpenAI endpoint
+# sed -i 's/<YOUR_OPENAI>/THISISYOURAISERVICESKEY/g' /home/$adminUsername/cerebral/cerebral.yaml
+sed -i "s/<YOUR_OPENAI>/${aiservicesKey}/g" /home/$adminUsername/cerebral/cerebral.yaml
+# sed -i 's#<AZURE OPEN AI ENDPOINT>#https://aistdioserviceeast.openai.azure.com/#g' /home/$adminUsername/cerebral/cerebral.yaml
+sed -i "s#<AZURE OPEN AI ENDPOINT>#${aiServicesEndpoint}#g" /home/$adminUsername/cerebral/cerebral.yaml
+# sed -i 's/2024-03-01-preview/2024-03-15-preview/g' /home/$adminUsername/cerebral/cerebral.yaml
+
+kubectl apply -f /home/$adminUsername/cerebral/cerebral.yaml
+sleep 30
+
+#Install Dapr runtime on the cluster
+helm repo add dapr https://dapr.github.io/helm-charts/
+helm repo update
+helm upgrade --install dapr dapr/dapr --version=1.11 --namespace dapr-system --create-namespace --wait
+sleep 30
 
 #Creating the ML workload namespace
 #https://medium.com/@jmasengesho/azure-machine-learning-service-for-kubernetes-architects-deploy-your-first-model-on-aks-with-az-440ada47b4a0

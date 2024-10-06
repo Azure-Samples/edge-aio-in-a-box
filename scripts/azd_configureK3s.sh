@@ -171,7 +171,7 @@ sleep 60
 # Starting off the post deployment steps. The following steps are to deploy Azure IoT Operations components
 # Reference: https://learn.microsoft.com/en-us/azure/iot-operations/deploy-iot-ops/howto-prepare-cluster?tabs=ubuntu#create-a-cluster
 # Reference: https://learn.microsoft.com/en-us/cli/azure/iot/ops?view=azure-cli-latest#az-iot-ops-init
-echo "Deploy IoT Operations Components"
+echo "Deploy IoT Operations Components. These commands take several minutes to complete."
 
 #Increase user watch/instance limits:
 echo fs.inotify.max_user_instances=8192 | sudo tee -a /etc/sysctl.conf
@@ -190,13 +190,21 @@ az connectedk8s enable-features -g $rg \
     --custom-locations-oid $customLocationRPSPID \
     --features cluster-connect custom-locations
 
-#Deploy Azure IoT Operations. These commands take several minutes to complete.
-#--simulate-plc -> Flag to enable a simulated PLC. Flag when set, will configure the OPC-UA broker installer to spin-up a PLC server.
+# Initial values for variables
+SCHEMA_REGISTRY="aiobxregistry"
+SCHEMA_REGISTRY_NAMESPACE="aiobxregistryns"
 
+# Generate random 3-character suffix (alphanumeric)
+SUFFIX=$(tr -dc 'a-z0-9' </dev/urandom | head -c 4)
+
+# Append the unique suffixes to the variables
+SCHEMA_REGISTRY="${SCHEMA_REGISTRY}${SUFFIX}"
+SCHEMA_REGISTRY_NAMESPACE="${SCHEMA_REGISTRY_NAMESPACE}${SUFFIX}"
 
 az extension add --name azure-iot-ops --allow-preview true --version 0.6.0b4 --yes 
 
 echo "Deploy Azure IoT Operations."
+#--simulate-plc -> Flag to enable a simulated PLC. Flag when set, will configure the OPC-UA broker installer to spin-up a PLC server.
 az iot ops init -g $rg \
     --cluster $arcK8sClusterName \
     --kv-id $keyVaultId \
