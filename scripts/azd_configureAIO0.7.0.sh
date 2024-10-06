@@ -19,6 +19,7 @@
 # $14 = Azure Service Principal App Object ID
 # $15 = Azure AI Service Endpoint
 # $16 = Azure AI Service Key
+# $17 = Azure Storage Resource ID
 
 #  1   ${resourceGroup().name}
 #  2   ${arcK8sClusterName}
@@ -57,7 +58,6 @@ spAppObjectId=${14}
 aiServicesEndpoint=${15}
 aiservicesKey=${16}
 stgId=${17}
-
 
 #############################
 # Script Definition
