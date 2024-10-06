@@ -299,7 +299,7 @@ kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/edge-aio-in-a-b
 
 #rag-on-edge-web: a web application to interact with the user to submit the search and generation query.
 
-# #rag-on-edge-interface: an interface module to interact with web frontend and the backend components.
+#rag-on-edge-interface: an interface module to interact with web frontend and the backend components.
 
 #rag-on-edge-vectorDB: a database to store the vectors. 
 

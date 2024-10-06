@@ -288,16 +288,16 @@ kubectl get all -n azureml-workloads
 
 #Deploy Azure IoT MQ - Dapr PubSub Components
 #rag-on-edge-pubsub-broker: a pub/sub message broker for message passing between the components.
-# kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/edge-aio-in-a-box/main/rag-on-edge/yaml/rag-mq-components-aio0p6.yaml
+kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/edge-aio-in-a-box/main/rag-on-edge/yaml/rag-mq-components-aio0p6.yaml
 
-# #rag-on-edge-web: a web application to interact with the user to submit the search and generation query.
+#rag-on-edge-web: a web application to interact with the user to submit the search and generation query.
 # kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/edge-aio-in-a-box/main/rag-on-edge/yaml/rag-web-workload-aio0p6-acrairstream.yaml
 
-# #rag-on-edge-interface: an interface module to interact with web frontend and the backend components.
+#rag-on-edge-interface: an interface module to interact with web frontend and the backend components.
 # kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/edge-aio-in-a-box/main/rag-on-edge/yaml/rag-interface-dapr-workload-aio0p6-acrairstream.yaml
 
-# #rag-on-edge-vectorDB: a database to store the vectors. 
+#rag-on-edge-vectorDB: a database to store the vectors. 
 # kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/edge-aio-in-a-box/main/rag-on-edge/yaml/rag-vdb-dapr-workload-aio0p6-acr-airstream.yaml
 
-# #rag-on-edge-LLM: a large language model (LLM) to generate the response based on the vector search result.
+#rag-on-edge-LLM: a large language model (LLM) to generate the response based on the vector search result.
 # kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/edge-aio-in-a-box/main/rag-on-edge/yaml/rag-llm-dapr-workload-aio0p6-acrairstream.yaml
