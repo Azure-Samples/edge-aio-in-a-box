@@ -53,6 +53,7 @@ resource deployment 'Microsoft.CognitiveServices/accounts/deployments@2023-05-01
 
 output endpoint string = aiServices.properties.endpoint
 output endpoints object = aiServices.properties.endpoints
+output openAiLanguageEndpoint string = 'https://${aiServicesName}.openai.azure.com'
 output id string = aiServices.id
 output name string = aiServices.name
 output skuName string = aiServices.sku.name

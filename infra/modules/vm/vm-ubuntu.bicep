@@ -45,7 +45,7 @@ param customLocationRPSPID string
 param aiServicesName string
 @description('Resource ID of the AI Services endpoint')
 param aiServicesEndpoint string
-
+param stgId string
 
 var osDiskType = 'Premium_LRS'
 
@@ -136,6 +136,7 @@ resource vm 'Microsoft.Compute/virtualMachines@2023-07-01' = {
   }
 }
 
+//https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles
 module roleArcAdminRole '../identity/role.bicep' = {
   name: 'deployVMRole_AzureArcClusterAdminRole'
   scope: resourceGroup()
@@ -207,7 +208,7 @@ resource vmext 'Microsoft.Compute/virtualMachines/extensions@2023-09-01' = {
       fileUris: [
         '${scriptURI}${ShellScriptName}'
       ]
-      commandToExecute: 'sh ${ShellScriptName} ${resourceGroup().name} ${arcK8sClusterName} ${location} ${adminUsername} ${vmUserAssignedIdentityPrincipalID} ${customLocationRPSPID} ${keyVaultId} ${keyVaultName} ${subscription().subscriptionId} ${spAppId} ${spSecret} ${subscription().tenantId} ${spObjectId} ${spAppObjectId} ${aiServicesEndpoint} ${cognitiveServices.listKeys().key1}'
+      commandToExecute: 'sh ${ShellScriptName} ${resourceGroup().name} ${arcK8sClusterName} ${location} ${adminUsername} ${vmUserAssignedIdentityPrincipalID} ${customLocationRPSPID} ${keyVaultId} ${keyVaultName} ${subscription().subscriptionId} ${spAppId} ${spSecret} ${subscription().tenantId} ${spObjectId} ${spAppObjectId} ${aiServicesEndpoint} ${cognitiveServices.listKeys().key1} ${stgId}'
     }
   }
   dependsOn: [

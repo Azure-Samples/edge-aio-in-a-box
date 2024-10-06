@@ -11,32 +11,12 @@
         Install Latest version of Bicep
         https://docs.microsoft.com/en-us/azure/azure-resource-manager/bicep/install
 
-        To Run:
-        az login
+        To Run terminal to the root folder of this repository and run the following command:
+        azd auth login --use-device-code
+        az login --use-device-code 
         az account set --subscription <subscription id>
-        az group create --name <your resource group name> --location <your resource group location>
-        az ad user show --id 'your email' --query id
 
-        az bicep build --file main.bicep
-        az deployment group create --resource-group <your resource group name>  --template-file main.bicep --parameters main.paraeters.json --name AIO-in-a-Box --query 'properties.outputs'
-
-        SCRIPT STEPS
-        1 - Create Resource Group
-        2 - Create User Assigned Identity for VM
-        3 - Create KeyVault used for Azure IoT Operations
-        4 - Create Required Storage Account(s)
-        5 - Create NSG
-        6 - Create VNET
-        7 - Create VM/K3s Public IP
-        8 - Build reference of existing subnets
-        9 - Create Ubuntu VM for K3s
-        10 - Create Application Insights
-        11 - Create Azure Container Registry
-        12 - Create Azure Machine Learning Workspace
-        13 - Upload Notebooks to Azure ML Studio
-        14 - Attach a Kubernetes cluster to Azure Machine Learning workspace
-        15 - Deploy Application using GitOps
-   
+        azd up
       //=====================================================================================
 
 */
@@ -125,7 +105,6 @@ param ShellScriptName string = 'azd_configureK3s.sh'
 @sys.description('Custom Locations RP ObjectID')
 param customLocationRPSPID string = ''
 
-
 //Storage Account
 var storageAccountName = ''
 
@@ -192,6 +171,18 @@ module m_msi 'modules/identity/msi.bicep' = {
   }
 }
 
+module roleOwner 'modules/identity/role.bicep' = {
+  name: 'deployVMRole_Owner'
+  scope: resourceGroup
+  params:{
+    principalId: m_msi.outputs.msiPrincipalID
+    roleGuid: '8e3af657-a8ff-443c-a75c-2fe8c4bcb635' // Owner
+  }
+  dependsOn: [
+    m_msi
+  ]
+}
+
 //3. Create KeyVault used for Azure IoT Operations
 //https://docs.microsoft.com/en-us/azure/templates/microsoft.keyvault/vaults
 module m_kvn 'modules/keyvault/keyvault.bicep' = {
@@ -208,14 +199,13 @@ module m_kvn 'modules/keyvault/keyvault.bicep' = {
 }
 
 //4. Create Required Storage Account(s)
-//Deploy Storage Accounts (Create your Storage Account (ADLS Gen2 & HNS Enabled) for your ML Workspace)
-//https://docs.microsoft.com/en-us/azure/templates/microsoft.storage/storageaccounts?tabs=bicep
-module m_stg 'modules/aml/storage.bicep' = {
+//Deploy Storage Accounts (Create your Storage Account for your ML and AI Studio Workspace)
+//https://docs.microsoft.com/en-us/azure/templates/microsoft.storage/storageaccounts
+module m_stg 'modules/storage/storage-account.bicep' = {
   name: 'deploy_storageaccount'
   scope: resourceGroup
   params: {
     storageAccountName: !empty(storageAccountName) ? storageAccountName : '${abbrs.storageStorageAccounts}${environmentName}${uniqueSuffix}'
-    location: location
   }
 }
 
@@ -233,7 +223,6 @@ module m_loga 'modules/aml/loganalytics.bicep' = {
 
 //6. Create Application Insights Instance
 //https://learn.microsoft.com/en-us/azure/templates/microsoft.insights/components?pivots=deployment-language-bicep
-
 module m_aisn 'modules/aml/applicationinsights.bicep' = {
   name: 'deploy_appinsights'
   scope: resourceGroup
@@ -287,6 +276,26 @@ module aiHub 'modules/ai/ai-hub.bicep' = {
     containerRegistryId: m_acr.outputs.acrId
     keyVaultId: m_kvn.outputs.keyVaultId
     storageAccountId: m_stg.outputs.stgId
+  }
+}
+
+//15. Create Azure Machine Learning Workspace
+//https://learn.microsoft.com/en-us/azure/templates/microsoft.machinelearningservices/workspaces?pivots=deployment-language-bicep
+module m_aml './modules/aml/azureml.bicep' = {
+  name: 'deploy_azureml'
+  scope: resourceGroup
+  params: {
+    location: location
+    aisnId: m_aisn.outputs.applicationInsightId
+    amlcompclustername: !empty(amlcompclustername) ? amlcompclustername : '${abbrs.machineLearningServicesCluster}${environmentName}-${uniqueSuffix}'
+    amlcompinstancename: !empty(amlcompinstancename) ? amlcompinstancename : '${abbrs.machineLearningServicesComputeCPU}${environmentName}-${uniqueSuffix}'
+    keyvaultId: m_kvn.outputs.keyVaultId
+    storageAccountId: m_stg.outputs.stgId
+    workspaceName: !empty(workspaceName) ? workspaceName : '${abbrs.machineLearningServicesWorkspaces}${environmentName}-${uniqueSuffix}'
+    hbi_workspace: hbi_workspace
+    acrId: m_acr.outputs.acrId
+    systemDatastoresAuthMode: ((systemDatastoresAuthMode == 'accessKey') ? systemDatastoresAuthMode : 'identity')
+    tags: tags
   }
 }
 
@@ -449,6 +458,22 @@ resource subnet 'Microsoft.Network/virtualNetworks/subnets@2023-05-01' existing 
   name: '${m_vnet.outputs.vnetName}/${subnetName}'
 }
 
+//4. Create Required Storage Account with HNS Enabled for AIO Schema
+//https://docs.microsoft.com/en-us/azure/templates/microsoft.storage/storageaccounts
+module m_stghns 'modules/storage/storage.bicep' = {
+  name: 'deploy_storageaccounthns'
+  scope: resourceGroup
+  params: {
+    storageAccountName: !empty(storageAccountName) ? '${storageAccountName}hns' : '${abbrs.storageStorageAccounts}${environmentName}${uniqueSuffix}hns'
+    vmUserAssignedIdentityID: m_msi.outputs.msiPrincipalID
+    isHnsEnabled: true
+  }
+  dependsOn: [
+    m_msi
+    roleOwner
+  ]
+}
+
 //14. Create Ubuntu VM for K3s
 module m_vm 'modules/vm/vm-ubuntu.bicep' = {
   name: 'deploy_K3sVM'
@@ -481,6 +506,7 @@ module m_vm 'modules/vm/vm-ubuntu.bicep' = {
     spAppObjectId: spAppObjectId
     aiServicesEndpoint: aiDependencies.outputs.openAiEndpoints
     aiServicesName: aiDependencies.outputs.openAiName
+    stgId: m_stghns.outputs.stgId
   }
   dependsOn: [
     m_nsg
@@ -490,30 +516,10 @@ module m_vm 'modules/vm/vm-ubuntu.bicep' = {
   ]
 }
 
-//15. Create Azure Machine Learning Workspace
-//https://learn.microsoft.com/en-us/azure/templates/microsoft.machinelearningservices/workspaces?pivots=deployment-language-bicep
-module m_aml './modules/aml/azureml.bicep' = {
-  name: 'deploy_azureml'
-  scope: resourceGroup
-  params: {
-    location: location
-    aisnId: m_aisn.outputs.applicationInsightId
-    amlcompclustername: !empty(amlcompclustername) ? amlcompclustername : '${abbrs.machineLearningServicesCluster}${environmentName}-${uniqueSuffix}'
-    amlcompinstancename: !empty(amlcompinstancename) ? amlcompinstancename : '${abbrs.machineLearningServicesComputeCPU}${environmentName}-${uniqueSuffix}'
-    keyvaultId: m_kvn.outputs.keyVaultId
-    storageAccountId: m_stg.outputs.stgId
-    workspaceName: !empty(workspaceName) ? workspaceName : '${abbrs.machineLearningServicesWorkspaces}${environmentName}-${uniqueSuffix}'
-    hbi_workspace: hbi_workspace
-    acrId: m_acr.outputs.acrId
-    systemDatastoresAuthMode: ((systemDatastoresAuthMode == 'accessKey') ? systemDatastoresAuthMode : 'identity')
-    tags: tags
-  }
-}
-
-// ********************************************************
-// Deployment Scripts
-// ********************************************************
-// Attach a Kubernetes cluster to Azure Machine Learning workspace
+//********************************************************
+//Deployment Scripts
+//********************************************************
+//Attach a Kubernetes cluster to Azure Machine Learning workspace
 module script_attachK3sCluster './modules/aml/attachK3sCluster.bicep' = {
   name: 'script_attachK3sCluster'
   scope: resourceGroup
