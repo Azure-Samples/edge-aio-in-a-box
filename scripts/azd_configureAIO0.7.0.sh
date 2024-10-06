@@ -210,11 +210,10 @@ az iot ops schema registry create -g $rg -n $SCHEMA_REGISTRY --registry-namespac
 
 echo "Prepare the cluster for Azure IoT Operations deployment."
 #az iot ops schema registry show --name aiobxregistry1 --resource-group aiobxap070-aioedgeai-rg -o tsv --query id
-az iot ops init -g $rg --cluster $arcK8sClusterName --sr-resource-id "$(az iot ops schema registry show --name $SCHEMA_REGISTRY --resource-group $rg -o tsv --query id)"
 #az iot ops init -g aiobxap070-aioedgeai-rg --cluster aiobmclusterap --sr-resource-id "/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxx/resourceGroups/aiobxap070-aioedgeai-rg/providers/Microsoft.DeviceRegistry/schemaRegistries/aiobxregistry1"
+az iot ops init -g $rg --cluster $arcK8sClusterName --sr-resource-id "$(az iot ops schema registry show --name $SCHEMA_REGISTRY --resource-group $rg -o tsv --query id)"
 
 echo "Deploy Azure IoT Operations."
-# az iot ops create -g aiobxap070-aioedgeai-rg  --cluster aiobmclusterxx  --custom-location aiobmclusterxx-cl-7199  -n aiobmclusterxx-ops-instance
 az iot ops create -g $rg --cluster $arcK8sClusterName --custom-location "${arcK8sClusterName}-cl-${SUFFIX}" -n "${arcK8sClusterName}-ops-instance"
 
 
@@ -224,9 +223,41 @@ az iot ops create -g $rg --cluster $arcK8sClusterName --custom-location "${arcK8
 #https://learn.microsoft.com/en-us/azure/machine-learning/how-to-deploy-kubernetes-extension
 # allowInsecureConnections=True - Allow HTTP communication or not. HTTP communication is not a secure way. If not allowed, HTTPs will be used.
 # InferenceRouterHA=False       - By default, AzureML extension will deploy 3 ingress controller replicas for high availability, which requires at least 3 workers in a cluster. Set this to False if you have less than 3 workers and want to deploy AzureML extension for development and testing only, in this case it will deploy one ingress controller replica only.
+az k8s-extension create \
+    -g $rg \
+    -c $arcK8sClusterName \
+    -n azureml \
+    --cluster-type connectedClusters \
+    --extension-type Microsoft.AzureML.Kubernetes \
+    --scope cluster \
+    --config enableTraining=False enableInference=True allowInsecureConnections=True inferenceRouterServiceType=loadBalancer inferenceRouterHA=False autoUpgrade=True installNvidiaDevicePlugin=False installPromOp=False installVolcano=False installDcgmExporter=False --auto-upgrade true --verbose # This is since our K3s is 1 node
 
 
 #############################
 #Deploy Namespace, InfluxDB, Simulator, and Redis
 #############################
 #Create a folder for Cerebral configuration files
+mkdir -p /home/$adminUsername/cerebral
+sleep 60
+
+#Apply the Cerebral namespace
+kubectl apply -f https://raw.githubusercontent.com/Azure/arc_jumpstart_drops/main/sample_app/cerebral_genai/deployment/cerebral-ns.yaml
+
+#Create a directory for persistent InfluxDB data
+sudo mkdir /var/lib/influxdb2
+sudo chmod 777 /var/lib/influxdb2
+
+#Deploy InfluxDB, Configure InfluxDB, and Deploy the Data Simulator
+kubectl apply -f https://raw.githubusercontent.com/Azure/arc_jumpstart_drops/main/sample_app/cerebral_genai/deployment/influxdb.yaml
+sleep 30
+kubectl apply -f https://raw.githubusercontent.com/Azure/arc_jumpstart_drops/main/sample_app/cerebral_genai/deployment/influxdb-setup.yaml
+sleep 30
+#Validate the implementation
+kubectl get all -n cerebral
+
+#Creating the ML workload namespace
+#https://medium.com/@jmasengesho/azure-machine-learning-service-for-kubernetes-architects-deploy-your-first-model-on-aks-with-az-440ada47b4a0
+#When creating the Azure ML Extension we do not want all the ML workloads and models we create later on on the same namespace as the Azure ML Extension.
+#So we will create a separate namespace for the ML workloads and models.
+kubectl create namespace azureml-workloads
+kubectl get all -n azureml-workloads

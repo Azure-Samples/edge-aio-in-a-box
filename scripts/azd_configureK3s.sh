@@ -271,15 +271,15 @@ helm repo update
 helm upgrade --install dapr dapr/dapr --version=1.11 --namespace dapr-system --create-namespace --wait
 sleep 30
 
-# #Creating the ML workload namespace
-# #https://medium.com/@jmasengesho/azure-machine-learning-service-for-kubernetes-architects-deploy-your-first-model-on-aks-with-az-440ada47b4a0
-# #When creating the Azure ML Extension we do not all the ML workloads and models we create later on on the same namespace as the Azure ML Extension.
-# #We create a separate namespace for the ML workloads and models.
+#Creating the ML workload namespace
+#https://medium.com/@jmasengesho/azure-machine-learning-service-for-kubernetes-architects-deploy-your-first-model-on-aks-with-az-440ada47b4a0
+#When creating the Azure ML Extension we do not want all the ML workloads and models we create later on on the same namespace as the Azure ML Extension.
+#So we will create a separate namespace for the ML workloads and models.
 kubectl create namespace azureml-workloads
 kubectl get all -n azureml-workloads
 
-# #Deploy Azure IoT MQ - Dapr PubSub Components
-# #rag-on-edge-pubsub-broker: a pub/sub message broker for message passing between the components.
+#Deploy Azure IoT MQ - Dapr PubSub Components
+#rag-on-edge-pubsub-broker: a pub/sub message broker for message passing between the components.
 # kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/edge-aio-in-a-box/main/rag-on-edge/yaml/rag-mq-components-aio0p6.yaml
 
 # #rag-on-edge-web: a web application to interact with the user to submit the search and generation query.
