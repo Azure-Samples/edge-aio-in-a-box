@@ -171,18 +171,6 @@ module m_msi 'modules/identity/msi.bicep' = {
   }
 }
 
-module roleOwner 'modules/identity/role.bicep' = {
-  name: 'deployVMRole_Owner'
-  scope: resourceGroup
-  params:{
-    principalId: m_msi.outputs.msiPrincipalID
-    roleGuid: '8e3af657-a8ff-443c-a75c-2fe8c4bcb635' // Owner
-  }
-  dependsOn: [
-    m_msi
-  ]
-}
-
 //3. Create KeyVault used for Azure IoT Operations
 //https://docs.microsoft.com/en-us/azure/templates/microsoft.keyvault/vaults
 module m_kvn 'modules/keyvault/keyvault.bicep' = {
@@ -458,6 +446,19 @@ resource subnet 'Microsoft.Network/virtualNetworks/subnets@2023-05-01' existing 
   name: '${m_vnet.outputs.vnetName}/${subnetName}'
 }
 
+module roleOwner 'modules/identity/role.bicep' = {
+  name: 'deployVMRole_Owner'
+  scope: resourceGroup
+  params:{
+    principalId: m_msi.outputs.msiPrincipalID
+    roleGuid: '8e3af657-a8ff-443c-a75c-2fe8c4bcb635' // Owner
+  }
+  dependsOn: [
+    m_msi
+    m_stg
+  ]
+}
+
 //4. Create Required Storage Account with HNS Enabled for AIO Schema
 //https://docs.microsoft.com/en-us/azure/templates/microsoft.storage/storageaccounts
 module m_stghns 'modules/storage/storage.bicep' = {
@@ -513,6 +514,7 @@ module m_vm 'modules/vm/vm-ubuntu.bicep' = {
     m_vnet
     m_pip
     m_kvn
+    m_stghns
   ]
 }
 

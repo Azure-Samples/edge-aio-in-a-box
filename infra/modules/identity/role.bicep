@@ -12,9 +12,10 @@ param roleGuid string
 
 //1. Deployment script UAMI is set as Resource Group owner so it can have authorization to perform post deployment tasks
 resource role_assignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(resourceGroup().id, principalId, roleGuid)
+  name: guid(principalId, roleGuid, resourceGroup().id)
   properties: {
     principalId: principalId
     roleDefinitionId: resourceId('Microsoft.Authorization/roleDefinitions', roleGuid)
+    principalType: 'ServicePrincipal'
   }
 }

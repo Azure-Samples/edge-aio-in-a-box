@@ -298,6 +298,7 @@ kubectl get all -n azureml-workloads
 kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/edge-aio-in-a-box/main/rag-on-edge/yaml/rag-mq-components-aio0p6.yaml
 
 #rag-on-edge-web: a web application to interact with the user to submit the search and generation query.
+kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/edge-aio-in-a-box/main/rag-on-edge/yaml/rag-web-workload-aio0p6-acrairstream.yaml
 
 #rag-on-edge-interface: an interface module to interact with web frontend and the backend components.
 
