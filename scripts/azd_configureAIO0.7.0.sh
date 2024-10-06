@@ -208,7 +208,7 @@ echo "Prepare the cluster for Azure IoT Operations deployment."
 # az iot ops init -g $rg --cluster $arcK8sClusterName --sr-resource-id $(az iot ops schema registry show --name $SCHEMA_REGISTRY --resource-group $rg -o tsv --query id)
 
 #az iot ops schema registry show --name aiobxregistry1 --resource-group aiobxap070-aioedgeai-rg -o tsv --query id
-#az iot ops init -g aiobxap070-aioedgeai-rg --cluster aiobmclusterap --sr-resource-id /subscriptions/22c140ff-ca30-4d58-9223-08a6041970ab/resourceGroups/aiobxap070-aioedgeai-rg/providers/Microsoft.DeviceRegistry/schemaRegistries/aiobxregistry1
+az iot ops init -g aiobxap070-aioedgeai-rg --cluster aiobmclusterap --sr-resource-id "/subscriptions/22c140ff-ca30-4d58-9223-08a6041970ab/resourceGroups/aiobxap070-aioedgeai-rg/providers/Microsoft.DeviceRegistry/schemaRegistries/aiobxregistry1"
 
 
 echo "Deploy Azure IoT Operations."
