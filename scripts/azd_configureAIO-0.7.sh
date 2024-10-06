@@ -292,3 +292,6 @@ sleep 30
 #So we will create a separate namespace for the ML workloads and models.
 kubectl create namespace azureml-workloads
 kubectl get all -n azureml-workloads
+
+#Deploy Azure IoT MQ - Dapr PubSub Components
+#rag-on-edge-pubsub-broker: a pub/sub message broker for message passing between the components.

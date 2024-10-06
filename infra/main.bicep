@@ -100,7 +100,7 @@ param authenticationType string
 param scriptURI string = 'https://raw.githubusercontent.com/Azure-Samples/edge-aio-in-a-box/main/scripts/'
 
 @sys.description('Shell Script to be executed')
-param ShellScriptName string = 'azd_configureK3s.sh'
+param ShellScriptName string = 'azd_configureAIO-0.6.sh'
 
 @sys.description('Custom Locations RP ObjectID')
 param customLocationRPSPID string = ''
@@ -537,7 +537,7 @@ module script_attachK3sCluster './modules/aml/attachK3sCluster.bicep' = {
   ]
 }
 
-// Upload Notebooks to Azure ML Studio
+//Upload Notebooks to Azure ML Studio
 module script_UploadNotebooks './modules/aml/scriptNotebookUpload.bicep' = {
   name: 'script_UploadNotebooks'
   scope: resourceGroup
