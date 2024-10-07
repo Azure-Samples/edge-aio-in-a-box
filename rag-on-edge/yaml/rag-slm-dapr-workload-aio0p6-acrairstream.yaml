@@ -56,6 +56,7 @@ spec:
         - name: rag-llm
           image: airstream.azurecr.io/rag-on-edge-slm:latest
           imagePullPolicy: Always
+          #command: [ "tail", "-f", "/dev/null" ]
           # Remove commented out env variable if you want to override the # of logical cores in your system
           # env:
           # - name: N_THREADS # Number of CPU for LLM used for inferencing
