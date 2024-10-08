@@ -23,7 +23,6 @@ $resourceProviders = @(
     "Microsoft.EventHub",
     "Microsoft.ExtendedLocation",
     "Microsoft.IoTOperations",
-    "Microsoft.IoTOperations",
     "Microsoft.IoTOperationsDataProcessor",
     "Microsoft.IoTOperationsMQ",
     "Microsoft.IoTOperationsOrchestrator",
