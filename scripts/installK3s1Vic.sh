@@ -231,68 +231,68 @@ az k8s-extension create \
 #Deploy Namespace, InfluxDB, Simulator, and Redis
 #############################
 #Create a folder for Cerebral configuration files
-mkdir -p /home/$adminUsername/cerebral
-sleep 60
+# mkdir -p /home/$adminUsername/cerebral
+# sleep 60
 
-#Apply the Cerebral namespace
-kubectl apply -f https://raw.githubusercontent.com/Azure/arc_jumpstart_drops/main/sample_app/cerebral_genai/deployment/cerebral-ns.yaml
+# #Apply the Cerebral namespace
+# kubectl apply -f https://raw.githubusercontent.com/Azure/arc_jumpstart_drops/main/sample_app/cerebral_genai/deployment/cerebral-ns.yaml
 
-#Create a directory for persistent InfluxDB data
-sudo mkdir /var/lib/influxdb2
-sudo chmod 777 /var/lib/influxdb2
+# #Create a directory for persistent InfluxDB data
+# sudo mkdir /var/lib/influxdb2
+# sudo chmod 777 /var/lib/influxdb2
 
-#Deploy InfluxDB, Configure InfluxDB, and Deploy the Data Simulator
-kubectl apply -f https://raw.githubusercontent.com/Azure/arc_jumpstart_drops/main/sample_app/cerebral_genai/deployment/influxdb.yaml
-sleep 30
-kubectl apply -f https://raw.githubusercontent.com/Azure/arc_jumpstart_drops/main/sample_app/cerebral_genai/deployment/influxdb-setup.yaml
-sleep 30
-kubectl apply -f https://raw.githubusercontent.com/Azure/arc_jumpstart_drops/main/sample_app/cerebral_genai/deployment/cerebral-simulator.yaml
-sleep 30
+# #Deploy InfluxDB, Configure InfluxDB, and Deploy the Data Simulator
+# kubectl apply -f https://raw.githubusercontent.com/Azure/arc_jumpstart_drops/main/sample_app/cerebral_genai/deployment/influxdb.yaml
+# sleep 30
+# kubectl apply -f https://raw.githubusercontent.com/Azure/arc_jumpstart_drops/main/sample_app/cerebral_genai/deployment/influxdb-setup.yaml
+# sleep 30
+# kubectl apply -f https://raw.githubusercontent.com/Azure/arc_jumpstart_drops/main/sample_app/cerebral_genai/deployment/cerebral-simulator.yaml
+# sleep 30
 
-#Validate the implementation
-kubectl get all -n cerebral
+# #Validate the implementation
+# kubectl get all -n cerebral
 
-#Deploy Redis to store user sessions and conversation history
-kubectl apply -f https://raw.githubusercontent.com/Azure/arc_jumpstart_drops/main/sample_app/cerebral_genai/deployment/redis.yaml
+# #Deploy Redis to store user sessions and conversation history
+# kubectl apply -f https://raw.githubusercontent.com/Azure/arc_jumpstart_drops/main/sample_app/cerebral_genai/deployment/redis.yaml
 
-#Deploy Cerebral Application
-#Download the Cerebral application deployment file
-sleep 30
-wget -P /home/$adminUsername/cerebral https://raw.githubusercontent.com/Azure/arc_jumpstart_drops/main/sample_app/cerebral_genai/deployment/cerebral.yaml
+# #Deploy Cerebral Application
+# #Download the Cerebral application deployment file
+# sleep 30
+# wget -P /home/$adminUsername/cerebral https://raw.githubusercontent.com/Azure/arc_jumpstart_drops/main/sample_app/cerebral_genai/deployment/cerebral.yaml
 
-#Update the Cerebral application deployment file with the Azure OpenAI endpoint
-sed -i 's/<YOUR_OPENAI>/65b22c3cec9d449e881b54efc91e0db3/g' /home/$adminUsername/cerebral/cerebral.yaml
-sed -i 's#<AZURE OPEN AI ENDPOINT>#https://aistdioserviceeast.openai.azure.com/#g' /home/$adminUsername/cerebral/cerebral.yaml
-# sed -i 's/2024-03-01-preview/2024-03-15-preview/g' /home/$adminUsername/cerebral/cerebral.yaml
+# #Update the Cerebral application deployment file with the Azure OpenAI endpoint
+# sed -i 's/<YOUR_OPENAI>/65b22c3cec9d449e881b54efc91e0db3/g' /home/$adminUsername/cerebral/cerebral.yaml
+# sed -i 's#<AZURE OPEN AI ENDPOINT>#https://aistdioserviceeast.openai.azure.com/#g' /home/$adminUsername/cerebral/cerebral.yaml
+# # sed -i 's/2024-03-01-preview/2024-03-15-preview/g' /home/$adminUsername/cerebral/cerebral.yaml
 
-kubectl apply -f /home/$adminUsername/cerebral/cerebral.yaml
-sleep 30
+# kubectl apply -f /home/$adminUsername/cerebral/cerebral.yaml
+# sleep 30
 
-#Install Dapr runtime on the cluster
-helm repo add dapr https://dapr.github.io/helm-charts/
-helm repo update
-helm upgrade --install dapr dapr/dapr --version=1.11 --namespace dapr-system --create-namespace --wait
-sleep 30
+# #Install Dapr runtime on the cluster
+# helm repo add dapr https://dapr.github.io/helm-charts/
+# helm repo update
+# helm upgrade --install dapr dapr/dapr --version=1.11 --namespace dapr-system --create-namespace --wait
+# sleep 30
 
-#Creating the ML workload namespace
-#https://medium.com/@jmasengesho/azure-machine-learning-service-for-kubernetes-architects-deploy-your-first-model-on-aks-with-az-440ada47b4a0
-#When creating the Azure ML Extension we do not all the ML workloads and models we create later on on the same namespace as the Azure ML Extension.
-#We create a separate namespace for the ML workloads and models.
-kubectl create namespace azureml-workloads
-kubectl get all -n azureml-workloads
+# #Creating the ML workload namespace
+# #https://medium.com/@jmasengesho/azure-machine-learning-service-for-kubernetes-architects-deploy-your-first-model-on-aks-with-az-440ada47b4a0
+# #When creating the Azure ML Extension we do not all the ML workloads and models we create later on on the same namespace as the Azure ML Extension.
+# #We create a separate namespace for the ML workloads and models.
+# kubectl create namespace azureml-workloads
+# kubectl get all -n azureml-workloads
 
-#Deploy Azure IoT MQ - Dapr PubSub Components
-#rag-on-edge-pubsub-broker: a pub/sub message broker for message passing between the components.
-kubectl apply -f https://raw.githubusercontent.com/Azure/AI-in-a-Box/aio-with-ai/edge-ai/AIO-with-AI/rag-on-edge/yaml/rag-mq-components-aio0p6.yaml
+# #Deploy Azure IoT MQ - Dapr PubSub Components
+# #rag-on-edge-pubsub-broker: a pub/sub message broker for message passing between the components.
+# kubectl apply -f https://raw.githubusercontent.com/Azure/AI-in-a-Box/aio-with-ai/edge-ai/AIO-with-AI/rag-on-edge/yaml/rag-mq-components-aio0p6.yaml
 
-#rag-on-edge-web: a web application to interact with the user to submit the search and generation query.
-kubectl apply -f https://raw.githubusercontent.com/Azure/AI-in-a-Box/aio-with-ai/edge-ai/AIO-with-AI/rag-on-edge/yaml/rag-web-workload-aio0p6-acrairstream.yaml
+# #rag-on-edge-web: a web application to interact with the user to submit the search and generation query.
+# kubectl apply -f https://raw.githubusercontent.com/Azure/AI-in-a-Box/aio-with-ai/edge-ai/AIO-with-AI/rag-on-edge/yaml/rag-web-workload-aio0p6-acrairstream.yaml
 
-#rag-on-edge-interface: an interface module to interact with web frontend and the backend components.
-kubectl apply -f https://raw.githubusercontent.com/Azure/AI-in-a-Box/aio-with-ai/edge-ai/AIO-with-AI/rag-on-edge/yaml/rag-interface-dapr-workload-aio0p6-acrairstream.yaml
+# #rag-on-edge-interface: an interface module to interact with web frontend and the backend components.
+# kubectl apply -f https://raw.githubusercontent.com/Azure/AI-in-a-Box/aio-with-ai/edge-ai/AIO-with-AI/rag-on-edge/yaml/rag-interface-dapr-workload-aio0p6-acrairstream.yaml
 
-#rag-on-edge-vectorDB: a database to store the vectors. 
-kubectl apply -f https://raw.githubusercontent.com/Azure/AI-in-a-Box/aio-with-ai/edge-ai/AIO-with-AI/rag-on-edge/yaml/rag-vdb-dapr-workload-aio0p6-acr-airstream.yaml
+# #rag-on-edge-vectorDB: a database to store the vectors. 
+# kubectl apply -f https://raw.githubusercontent.com/Azure/AI-in-a-Box/aio-with-ai/edge-ai/AIO-with-AI/rag-on-edge/yaml/rag-vdb-dapr-workload-aio0p6-acr-airstream.yaml
 
-#rag-on-edge-LLM: a large language model (LLM) to generate the response based on the vector search result.
-kubectl apply -f https://raw.githubusercontent.com/Azure/AI-in-a-Box/aio-with-ai/edge-ai/AIO-with-AI/rag-on-edge/yaml/rag-llm-dapr-workload-aio0p6-acrairstream.yaml
+# #rag-on-edge-LLM: a large language model (LLM) to generate the response based on the vector search result.
+# kubectl apply -f https://raw.githubusercontent.com/Azure/AI-in-a-Box/aio-with-ai/edge-ai/AIO-with-AI/rag-on-edge/yaml/rag-llm-dapr-workload-aio0p6-acrairstream.yaml
