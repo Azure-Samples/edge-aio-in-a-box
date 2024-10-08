@@ -130,9 +130,9 @@ echo "source <(helm completion bash)" >> /home/$adminUsername/.bashrc
 #Install Azure CLI
 #############################
 echo "Installing Azure CLI"
-#curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
 # Install a specific version
-apt-cache policy azure-cli; sudo apt-get install azure-cli=2.64.0-1~jammy
+# apt-cache policy azure-cli; sudo apt-get install azure-cli=2.64.0-1~jammy
 
 #############################
 #Azure Arc - Onboard the Cluster to Azure Arc
@@ -143,9 +143,10 @@ az login --identity --username $vmUserAssignedIdentityPrincipalID
 #az account set -s $subscriptionId
 
 az config set extension.use_dynamic_install=yes_without_prompt
+az config set auto-upgrade.enable=false
 
 az extension add --name connectedk8s --yes
-az extension update --name connectedk8s
+
 
 # Use the az connectedk8s connect command to Arc-enable your Kubernetes cluster and manage it as part of your Azure resource group
 az connectedk8s connect \
