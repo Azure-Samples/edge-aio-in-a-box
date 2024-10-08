@@ -1,17 +1,23 @@
-import streamlit as st
+# Standard library imports
+import os
 import time
-import logging
+import base64
+
+# Third-party imports
 import requests
-#from streamlit.server.server import Server
+import yaml
+import streamlit as st
+from dotenv import load_dotenv
 
-#logging.basicConfig(level=logging.INFO)
+# Azure OpenAI import
+from openai import AzureOpenAI
 
-# Check response for up to 100/1=100 times (100sec)
+# Load variables from .env file
+load_dotenv()
 
-#conversation_history = []
-st.title('GenAI Demo')
-st.caption("Natural Language Query For OT Data Insights")
-#st.set_page_config(page_title="Natural Language Query For OT Data Insights", page_icon=":memo:", layout="wide")
+st.title('🤖 GenAI Demo')
+st.caption("🚀 Natural Language Query For OT Data Insights")
+
 col1, col2  = st.columns((7,3)) 
 
 CHECK_INTERVAL_SEC = 1 

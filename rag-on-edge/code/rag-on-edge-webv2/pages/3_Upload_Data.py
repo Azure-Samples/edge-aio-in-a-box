@@ -1,8 +1,22 @@
-import streamlit as st
-import requests
+# Standard library imports
+import os
+import time
 import base64
 
-st.title('Upload PDF file for Azure Vector Search')
+# Third-party imports
+import requests
+import yaml
+import streamlit as st
+from dotenv import load_dotenv
+
+# Azure OpenAI import
+from openai import AzureOpenAI
+
+# Load variables from .env file
+load_dotenv()
+
+st.title('⬆️ Upload Data')
+st.subheader('Upload PDF file for Azure Vector Search')
 
 with st.spinner(text="Loading..."):
     backend_url = 'http://rag-vdb-service:8602/list_index_names'  

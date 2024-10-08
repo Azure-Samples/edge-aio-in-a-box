@@ -1,7 +1,21 @@
-import streamlit as st
-import requests
+# Standard library imports
+import os
+import time
+import base64
 
-st.title('Index Management')
+# Third-party imports
+import requests
+import yaml
+import streamlit as st
+from dotenv import load_dotenv
+
+# Azure OpenAI import
+from openai import AzureOpenAI
+
+# Load variables from .env file
+load_dotenv()
+
+st.title("🛠️ Index Management")
 st.subheader('Create Index')
 
 index_name = st.text_input('Please input index name')

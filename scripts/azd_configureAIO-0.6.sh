@@ -264,10 +264,10 @@ sleep 30
 wget -P /home/$adminUsername/cerebral https://raw.githubusercontent.com/Azure/arc_jumpstart_drops/main/sample_app/cerebral_genai/deployment/cerebral.yaml
 
 #Update the Cerebral application deployment file with the Azure OpenAI endpoint
-# sed -i 's/<YOUR_OPENAI>/THISISYOURAISERVICESKEY/g' /home/$adminUsername/cerebral/cerebral.yaml
-sed -i "s/<YOUR_OPENAI>/${aiservicesKey}/g" /home/$adminUsername/cerebral/cerebral.yaml
-# sed -i 's#<AZURE OPEN AI ENDPOINT>#https://aistdioserviceeast.openai.azure.com/#g' /home/$adminUsername/cerebral/cerebral.yaml
-sed -i "s#<AZURE OPEN AI ENDPOINT>#${aiServicesEndpoint}#g" /home/$adminUsername/cerebral/cerebral.yaml
+sed -i 's/<YOUR_OPENAI>/df103211c65047d7a64a141e91e7fd2b/g' /home/$adminUsername/cerebral/cerebral.yaml
+#sed -i "s/<YOUR_OPENAI>/${aiservicesKey}/g" /home/$adminUsername/cerebral/cerebral.yaml
+sed -i 's#<AZURE OPEN AI ENDPOINT>#https://aistdioserviceeast.openai.azure.com/#g' /home/$adminUsername/cerebral/cerebral.yaml
+#sed -i "s#<AZURE OPEN AI ENDPOINT>#${aiServicesEndpoint}#g" /home/$adminUsername/cerebral/cerebral.yaml
 # sed -i 's/2024-03-01-preview/2024-03-15-preview/g' /home/$adminUsername/cerebral/cerebral.yaml
 
 kubectl apply -f /home/$adminUsername/cerebral/cerebral.yaml
@@ -288,16 +288,16 @@ kubectl get all -n azureml-workloads
 
 #Deploy Azure IoT MQ - Dapr PubSub Components
 #rag-on-edge-pubsub-broker: a pub/sub message broker for message passing between the components.
-kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/edge-aio-in-a-box/main/rag-on-edge/yaml/rag-mq-components-aio0p6.yaml
+# kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/edge-aio-in-a-box/main/rag-on-edge/yaml/rag-mq-components-aio0p6.yaml
 
-#rag-on-edge-web: a web application to interact with the user to submit the search and generation query.
-kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/edge-aio-in-a-box/main/rag-on-edge/yaml/rag-web-workload-aio0p6-acrairstream.yaml
+# #rag-on-edge-web: a web application to interact with the user to submit the search and generation query.
+# kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/edge-aio-in-a-box/main/rag-on-edge/yaml/rag-web-workload-aio0p6-acrairstream.yaml
 
-#rag-on-edge-interface: an interface module to interact with web frontend and the backend components.
-kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/edge-aio-in-a-box/main/rag-on-edge/yaml/rag-interface-dapr-workload-aio0p6-acrairstream.yaml
+# #rag-on-edge-interface: an interface module to interact with web frontend and the backend components.
+# kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/edge-aio-in-a-box/main/rag-on-edge/yaml/rag-interface-dapr-workload-aio0p6-acrairstream.yaml
 
-#rag-on-edge-vectorDB: a database to store the vectors. 
-kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/edge-aio-in-a-box/main/rag-on-edge/yaml/rag-vdb-dapr-workload-aio0p6-acr-airstream.yaml
+# #rag-on-edge-vectorDB: a database to store the vectors. 
+# kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/edge-aio-in-a-box/main/rag-on-edge/yaml/rag-vdb-dapr-workload-aio0p6-acr-airstream.yaml
 
-#rag-on-edge-LLM: a large language model (LLM) to generate the response based on the vector search result.
-kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/edge-aio-in-a-box/main/rag-on-edge/yaml/rag-llm-dapr-workload-aio0p6-acrairstream.yaml
+# #rag-on-edge-LLM: a large language model (LLM) to generate the response based on the vector search result.
+# kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/edge-aio-in-a-box/main/rag-on-edge/yaml/rag-llm-dapr-workload-aio0p6-acrairstream.yaml
