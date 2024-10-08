@@ -164,7 +164,7 @@ sudo apt-get update -y
 sudo apt-get upgrade -y
 
 # Sleep for 60 seconds to allow the cluster to be fully connected
-sleep 60
+sleep 40
 
 #############################
 #Azure IoT Operations
@@ -253,3 +253,43 @@ sudo mkdir /var/lib/influxdb2
 sudo chmod 777 /var/lib/influxdb2
 
 #Deploy InfluxDB, Configure InfluxDB, and Deploy the Data Simulator
+kubectl apply -f https://raw.githubusercontent.com/Azure/arc_jumpstart_drops/main/sample_app/cerebral_genai/deployment/influxdb.yaml
+sleep 30
+kubectl apply -f https://raw.githubusercontent.com/Azure/arc_jumpstart_drops/main/sample_app/cerebral_genai/deployment/influxdb-setup.yaml
+sleep 30
+kubectl apply -f https://raw.githubusercontent.com/Azure/arc_jumpstart_drops/main/sample_app/cerebral_genai/deployment/cerebral-simulator.yaml
+sleep 30
+
+#Validate the implementation
+kubectl get all -n cerebral
+
+#Deploy Redis to store user sessions and conversation history
+kubectl apply -f https://raw.githubusercontent.com/Azure/arc_jumpstart_drops/main/sample_app/cerebral_genai/deployment/redis.yaml
+
+#Deploy Cerebral Application
+#Download the Cerebral application deployment file
+sleep 30
+wget -P /home/$adminUsername/cerebral https://raw.githubusercontent.com/Azure/arc_jumpstart_drops/main/sample_app/cerebral_genai/deployment/cerebral.yaml
+
+#Update the Cerebral application deployment file with the Azure OpenAI endpoint
+# sed -i 's/<YOUR_OPENAI>/THISISYOURAISERVICESKEY/g' /home/$adminUsername/cerebral/cerebral.yaml
+sed -i "s/<YOUR_OPENAI>/${aiservicesKey}/g" /home/$adminUsername/cerebral/cerebral.yaml
+# sed -i 's#<AZURE OPEN AI ENDPOINT>#https://aistdioserviceeast.openai.azure.com/#g' /home/$adminUsername/cerebral/cerebral.yaml
+sed -i "s#<AZURE OPEN AI ENDPOINT>#${aiServicesEndpoint}#g" /home/$adminUsername/cerebral/cerebral.yaml
+# sed -i 's/2024-03-01-preview/2024-03-15-preview/g' /home/$adminUsername/cerebral/cerebral.yaml
+
+kubectl apply -f /home/$adminUsername/cerebral/cerebral.yaml
+sleep 30
+
+#Install Dapr runtime on the cluster
+helm repo add dapr https://dapr.github.io/helm-charts/
+helm repo update
+helm upgrade --install dapr dapr/dapr --version=1.11 --namespace dapr-system --create-namespace --wait
+sleep 30
+
+#Creating the ML workload namespace
+#https://medium.com/@jmasengesho/azure-machine-learning-service-for-kubernetes-architects-deploy-your-first-model-on-aks-with-az-440ada47b4a0
+#When creating the Azure ML Extension we do not want all the ML workloads and models we create later on on the same namespace as the Azure ML Extension.
+#So we will create a separate namespace for the ML workloads and models.
+kubectl create namespace azureml-workloads
+kubectl get all -n azureml-workloads
