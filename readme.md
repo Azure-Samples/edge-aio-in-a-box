@@ -1,18 +1,38 @@
+# Azure IoT Operations with AI in-a-box
 ![Banner](./readme_assets/banner-aio-with-ai-in-a-box.png)
 
-# What's in this box?
+## Background
+The "AIO with AI in-a-box" project is a comprehensive toolkit designed to help users deploy AI and machine learning solutions at the edge efficiently especially in combination with [Azure IoT Operations](https://learn.microsoft.com/en-us/azure/iot-operations/) - AIO. The "AIO with AI in-a-box" includes a modular framework that enables the integration and management of AI models on edge devices (hybride) with AIO, bridging the gap between cloud-based AI models and local OT systems. With a focus on low-latency environments, this allows developers to build and deploy machine learning models directly to hybride edge devices with AIO. This makes it highly relevant for industries looking to integrate AI on the shopfloor, offering scalable, adaptable, and secure AI capabilities in distributed environments.
 
-![Banner](./readme_assets/aioedgeai.png)
+![GlobalSolution](./readme_assets/aioedgeai.png)
 
-This deployment accelerator contains a minimal AIO (Azure IoT Operations/Kubernetes) congiguration that enables:
+This accelerator contains a minimal AIO (Azure IoT Operations/Kubernetes) configuration that enables:
 
-1. **Azure ML to AIO** - Orchestration of resources for the entire Edge AI model lifecycle with AIO (Azure IoT Operations enabled by ARC), including creation, deployment, and proper packaging through Azure ML, AIO and ARC . This involves leveraging key components such as AIO, Arc-Enabled Kubernetes Cluster, ARC, Azure ML and Azure ML CLI V2 notebooks.
+* **Azure ML to AIO** - Orchestration of resources for the entire Edge AI model lifecycle with AIO (Azure IoT Operations enabled by ARC), including creation, deployment, and proper packaging through Azure ML, AIO and ARC . This involves leveraging key components such as AIO, Arc-Enabled Kubernetes Cluster, Azure ARC, Azure ML and Azure ML CLI V2 notebooks.
 
-1. **AIO with Open AI** - Deployment and enablement of ***[Cerebral](https://github.com/Azure/arc_jumpstart_drops/tree/main/sample_app/cerebral_genai)*** to demonstrate how to leverage Azure OpenAI and Natural Language Processing (NLP) within an AIO environment.
+* **AIO with Azure Open AI** - Deployment and enablement of ***[Cerebral](https://github.com/Azure/arc_jumpstart_drops/tree/main/sample_app/cerebral_genai)*** to demonstrate how to leverage Azure OpenAI and Natural Language Processing (NLP) within an AIO environment.
 
-1. **AIO with SLMs (RAG) on Edge** Deployment and Enablement of Small Language Models (SLMs) at the Edge within an AIO environment. This setup integrates SLMs to enable Retrieval-Augmented Generation (RAG) at the edge, optimizing performance and reducing reliance on cloud resources for a more efficient and responsive AIO deployment.
+* **AIO with SLMs (RAG) on Edge** Deployment and Enablement of Small Language Models (SLMs) at the Edge within an AIO environment. This setup integrates SLMs to enable Retrieval-Augmented Generation (RAG) at the edge, optimizing performance and reducing reliance on cloud resources for a more efficient and responsive AIO deployment.
 
-## Solution Architecture
+### Why with Microsoft Azure IoT Operations?
+
+[Microsoft Azure IoT Operations](https://learn.microsoft.com/en-us/azure/iot-operations/)  is ideal for manufacturing because it provides local processing power with (hybride) edge computing capabilities, enabling data processing for faster decision-making on the factory floor. It supports key industrial standards like OPC UA and MQTT, ensuring seamless integration with a wide range of manufacturing equipment and systems. The platform’s scalability makes it suitable for businesses of any size, whether managing a single facility or a global network of factories. By leveraging artificial intelligence and machine learning, Azure IoT allows manufacturers to gain deeper insights into production trends, enabling advanced analytics and proactive quality management.
+
+### Use cases for this solution
+Here are some example use cases that can be achieved with this solution.
+
+#### Quality control
+ The solution enhances quality control in manufacturing by enabling monitoring of production parameters using sensor data or camera technolgoy. With advanced AI and machine learning models trained in Microoft Azure, this solution can detect anomalies, such as defects or deviations from quality standards, early in the production process. This proactive approach reduces the risk of defective products reaching customers, thereby minimizing waste and rework.
+
+#### Energy Management
+It can enables manufacturers to implement effective energy management strategies by providing monitoring of energy consumption across production lines and facilities. Through advanced analytics, it can identifies energy inefficiencies, enabling the implementation of corrective actions that reduce waste and optimize energy use. These insights not only lower operational costs but also support ESG (Environmental, Social, and Governance) initiatives by helping manufacturers minimize their carbon footprint.
+
+#### Faster insights with Factory Copilot
+The factory copilot on the Edge can leverages data processing in the factory, providing operators and managers with actionable insights, alerts, and recommendations through a centralized dashboard. This digital assistant can proactively suggest process optimizations, highlight potential issues, and guide operators through complex tasks. With AI-driven analytics and natural language interfaces, the copilot improves situational awareness and empowers factory personnel to make data-driven decisions quickly. This synergy results in smoother operations, reduced downtime, and enhanced productivity across the production line.
+
+
+### High level Architecture
+Below is the global architecture of this accelerator. The core solution runs on an Ubuntu-based virtual machine using K3s. Alternatively, you can deploy this solution to a dedicated hybrid edge device, allowing the machine learning model to operate closer to your equipment.
 ![AIO with AI](/readme_assets/aioaiL.png) 
 
 ### The above architecture is explained step-by-step below:
@@ -30,6 +50,15 @@ This deployment accelerator contains a minimal AIO (Azure IoT Operations/Kuberne
 1. Once you have your model you deploy it to your AIO K3s Cluster
     1. You will build your model into a docker image and place that image in your container registry
     1. Using Azure ML Extension you will leverage the Azure ML Extension to pull the appropriate model from ACR into your K3s Cluster
+    
+[](./readme_assets/?)
+
+## Getting started
+The following steps are needed to install this solution:
+
+1. [Deploy the solution](./deployment.md) to Microsoft Azure
+2. [Post deployment ](./postdeployment.md)
+3. [Run and test the solution](./runsolution.md)
 
 ![AIO with AI Deployment Process](/readme_assets/aiomldeploymentprocess.png) 
 
@@ -133,6 +162,15 @@ Once your resources have been deployed you will need to do the following to get 
  - You need to make sure that you get this value from a tenant that you have access to get to the graph api in the tenant. 
  - https://learn.microsoft.com/en-us/azure/azure-arc/kubernetes/custom-locations
  - https://learn.microsoft.com/en-us/cli/azure/ad/sp?view=azure-cli-latest
+
+### Disclaimer
+The lifecycle management (health, kubernetes version upgrades, security updates to nodes, scaling, etc.) of the AKS or Arc enabled Kubernetes cluster is the responsibility of the customer.
+
+All preview features are available on a self-service, opt-in basis and are subject to breaking design and API changes. Previews are provided "as is" and "as available," and they're excluded from the service-level agreements and limited warranty.
+
+## Support
+
+We are always looking for feedback on our current experiences and what we should work on next. If there is anything you would like us to prioritize, please feel free to suggest so via our GitHub Issue Tracker. You can submit a bug report, a feature suggestion or participate in discussions.
 
 ## How to Contribute
 
