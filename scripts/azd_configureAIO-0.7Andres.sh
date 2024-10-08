@@ -153,12 +153,6 @@ az connectedk8s connect \
     --location $location \
     --kube-config /etc/rancher/k3s/k3s.yaml
 
-az connectedk8s connect \
-    --resource-group aiobx070-aioedgeai-rg \
-    --name aiobmclusterap \
-    --location eastus \
-    --kube-config /etc/rancher/k3s/k3s.yaml
-
 #############################
 #Arc for Kubernetes Extensions
 #############################
