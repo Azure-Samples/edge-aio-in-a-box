@@ -132,33 +132,7 @@ echo "source <(helm completion bash)" >> /home/$adminUsername/.bashrc
 echo "Installing Azure CLI"
 #curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
 # Install a specific version
-sudo apt-get install apt-transport-https ca-certificates curl gnupg lsb-release
-sudo mkdir -p /etc/apt/keyrings
-curl -sLS https://packages.microsoft.com/keys/microsoft.asc |
-  gpg --dearmor | sudo tee /etc/apt/keyrings/microsoft.gpg > /dev/null
-sudo chmod go+r /etc/apt/keyrings/microsoft.gpg
-
-AZ_DIST=$(lsb_release -cs)
-echo "Types: deb
-URIs: https://packages.microsoft.com/repos/azure-cli/
-Suites: ${AZ_DIST}
-Components: main
-Architectures: $(dpkg --print-architecture)
-Signed-by: /etc/apt/keyrings/microsoft.gpg" | sudo tee /etc/apt/sources.list.d/azure-cli.sources
-
-sudo apt-get update
-sudo apt-get install azure-cli
-
-apt-cache policy azure-cli
-
-# Obtain the currently installed distribution
-AZ_DIST=$(lsb_release -cs)
-
-# Store an Azure CLI version of choice
-AZ_VER=2.64.0
-
-# Install a specific version
-sudo apt-get install azure-cli=${AZ_VER}-1~${AZ_DIST}
+apt-cache policy azure-cli; sudo apt-get install azure-cli=2.64.0-1~jammy
 
 #############################
 #Azure Arc - Onboard the Cluster to Azure Arc
@@ -177,6 +151,12 @@ az connectedk8s connect \
     --resource-group $rg \
     --name $arcK8sClusterName \
     --location $location \
+    --kube-config /etc/rancher/k3s/k3s.yaml
+
+az connectedk8s connect \
+    --resource-group aiobx070-aioedgeai-rg \
+    --name aiobmclusterap \
+    --location eastus \
     --kube-config /etc/rancher/k3s/k3s.yaml
 
 #############################
