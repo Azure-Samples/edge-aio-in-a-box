@@ -116,7 +116,7 @@ KUBECONFIG=/etc/rancher/k3s/k3s.yaml
 export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
 
 #############################
-#Install Helm
+#Install Helm 
 #############################
 echo "Installing Helm"
 curl https://baltocdn.com/helm/signing.asc | sudo apt-key add -
@@ -177,7 +177,7 @@ echo "Deploy IoT Operations Components. These commands take several minutes to c
 echo fs.inotify.max_user_instances=8192 | sudo tee -a /etc/sysctl.conf
 echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf
 #Increase file descriptor limit:
-echo fs.file-max = 100000 | sudo tee -a /etc/sysctl.conf
+echo fs.file-max = 100000 | sudo tee -a /etc/sysctl.conf 
 
 sudo sysctl -p
 
@@ -227,64 +227,64 @@ az iot ops create -g $rg \
 #https://learn.microsoft.com/en-us/azure/machine-learning/how-to-deploy-kubernetes-extension
 # allowInsecureConnections=True - Allow HTTP communication or not. HTTP communication is not a secure way. If not allowed, HTTPs will be used.
 # InferenceRouterHA=False       - By default, AzureML extension will deploy 3 ingress controller replicas for high availability, which requires at least 3 workers in a cluster. Set this to False if you have less than 3 workers and want to deploy AzureML extension for development and testing only, in this case it will deploy one ingress controller replica only.
-# az k8s-extension create \
-#     -g $rg \
-#     -c $arcK8sClusterName \
-#     -n azureml \
-#     --cluster-type connectedClusters \
-#     --extension-type Microsoft.AzureML.Kubernetes \
-#     --scope cluster \
-#     --config enableTraining=False enableInference=True allowInsecureConnections=True inferenceRouterServiceType=loadBalancer inferenceRouterHA=False autoUpgrade=True installNvidiaDevicePlugin=False installPromOp=False installVolcano=False installDcgmExporter=False --auto-upgrade true --verbose # This is since our K3s is 1 node
+az k8s-extension create \
+    -g $rg \
+    -c $arcK8sClusterName \
+    -n azureml \
+    --cluster-type connectedClusters \
+    --extension-type Microsoft.AzureML.Kubernetes \
+    --scope cluster \
+    --config enableTraining=False enableInference=True allowInsecureConnections=True inferenceRouterServiceType=loadBalancer inferenceRouterHA=False autoUpgrade=True installNvidiaDevicePlugin=False installPromOp=False installVolcano=False installDcgmExporter=False --auto-upgrade true --verbose # This is since our K3s is 1 node
 
 
 #############################
 #Deploy Namespace, InfluxDB, Simulator, and Redis
 #############################
 #Create a folder for Cerebral configuration files
-# mkdir -p /home/$adminUsername/cerebral
-# sleep 60
+mkdir -p /home/$adminUsername/cerebral
+sleep 30
 
-# #Apply the Cerebral namespace
-# kubectl apply -f https://raw.githubusercontent.com/Azure/arc_jumpstart_drops/main/sample_app/cerebral_genai/deployment/cerebral-ns.yaml
+#Apply the Cerebral namespace
+kubectl apply -f https://raw.githubusercontent.com/Azure/arc_jumpstart_drops/main/sample_app/cerebral_genai/deployment/cerebral-ns.yaml
 
-# #Create a directory for persistent InfluxDB data
-# sudo mkdir /var/lib/influxdb2
-# sudo chmod 777 /var/lib/influxdb2
+#Create a directory for persistent InfluxDB data
+sudo mkdir /var/lib/influxdb2
+sudo chmod 777 /var/lib/influxdb2
 
-# #Deploy InfluxDB, Configure InfluxDB, and Deploy the Data Simulator
-# kubectl apply -f https://raw.githubusercontent.com/Azure/arc_jumpstart_drops/main/sample_app/cerebral_genai/deployment/influxdb.yaml
-# sleep 30
-# kubectl apply -f https://raw.githubusercontent.com/Azure/arc_jumpstart_drops/main/sample_app/cerebral_genai/deployment/influxdb-setup.yaml
-# sleep 30
-# kubectl apply -f https://raw.githubusercontent.com/Azure/arc_jumpstart_drops/main/sample_app/cerebral_genai/deployment/cerebral-simulator.yaml
-# sleep 30
+#Deploy InfluxDB, Configure InfluxDB, and Deploy the Data Simulator
+kubectl apply -f https://raw.githubusercontent.com/Azure/arc_jumpstart_drops/main/sample_app/cerebral_genai/deployment/influxdb.yaml
+sleep 30
+kubectl apply -f https://raw.githubusercontent.com/Azure/arc_jumpstart_drops/main/sample_app/cerebral_genai/deployment/influxdb-setup.yaml
+sleep 20
+kubectl apply -f https://raw.githubusercontent.com/Azure/arc_jumpstart_drops/main/sample_app/cerebral_genai/deployment/cerebral-simulator.yaml
+sleep 20
 
-# #Validate the implementation
-# kubectl get all -n cerebral
+#Validate the implementation
+kubectl get all -n cerebral
 
-# #Deploy Redis to store user sessions and conversation history
-# kubectl apply -f https://raw.githubusercontent.com/Azure/arc_jumpstart_drops/main/sample_app/cerebral_genai/deployment/redis.yaml
+#Deploy Redis to store user sessions and conversation history
+kubectl apply -f https://raw.githubusercontent.com/Azure/arc_jumpstart_drops/main/sample_app/cerebral_genai/deployment/redis.yaml
 
-# #Deploy Cerebral Application
-# #Download the Cerebral application deployment file
-# sleep 30
-# wget -P /home/$adminUsername/cerebral https://raw.githubusercontent.com/Azure/arc_jumpstart_drops/main/sample_app/cerebral_genai/deployment/cerebral.yaml
+#Deploy Cerebral Application
+#Download the Cerebral application deployment file
+sleep 20
+wget -P /home/$adminUsername/cerebral https://raw.githubusercontent.com/Azure/arc_jumpstart_drops/main/sample_app/cerebral_genai/deployment/cerebral.yaml
 
-# #Update the Cerebral application deployment file with the Azure OpenAI endpoint
-# # sed -i 's/<YOUR_OPENAI>/THISISYOURAISERVICESKEY/g' /home/$adminUsername/cerebral/cerebral.yaml
-# sed -i "s/<YOUR_OPENAI>/${aiservicesKey}/g" /home/$adminUsername/cerebral/cerebral.yaml
-# # sed -i 's#<AZURE OPEN AI ENDPOINT>#https://aistdioserviceeast.openai.azure.com/#g' /home/$adminUsername/cerebral/cerebral.yaml
-# sed -i "s#<AZURE OPEN AI ENDPOINT>#${aiServicesEndpoint}#g" /home/$adminUsername/cerebral/cerebral.yaml
-# # sed -i 's/2024-03-01-preview/2024-03-15-preview/g' /home/$adminUsername/cerebral/cerebral.yaml
+#Update the Cerebral application deployment file with the Azure OpenAI endpoint
+# sed -i 's/<YOUR_OPENAI>/THISISYOURAISERVICESKEY/g' /home/$adminUsername/cerebral/cerebral.yaml
+sed -i "s/<YOUR_OPENAI>/${aiservicesKey}/g" /home/$adminUsername/cerebral/cerebral.yaml
+# sed -i 's#<AZURE OPEN AI ENDPOINT>#https://aistdioserviceeast.openai.azure.com/#g' /home/$adminUsername/cerebral/cerebral.yaml
+sed -i "s#<AZURE OPEN AI ENDPOINT>#${aiServicesEndpoint}#g" /home/$adminUsername/cerebral/cerebral.yaml
+# sed -i 's/2024-03-01-preview/2024-03-15-preview/g' /home/$adminUsername/cerebral/cerebral.yaml
 
-# kubectl apply -f /home/$adminUsername/cerebral/cerebral.yaml
-# sleep 30
+kubectl apply -f /home/$adminUsername/cerebral/cerebral.yaml
+sleep 20
 
-# #Install Dapr runtime on the cluster
-# helm repo add dapr https://dapr.github.io/helm-charts/
-# helm repo update
-# helm upgrade --install dapr dapr/dapr --version=1.11 --namespace dapr-system --create-namespace --wait
-# sleep 30
+#Install Dapr runtime on the cluster
+helm repo add dapr https://dapr.github.io/helm-charts/
+helm repo update
+helm upgrade --install dapr dapr/dapr --version=1.11 --namespace dapr-system --create-namespace --wait
+sleep 20
 
 #Creating the ML workload namespace
 #https://medium.com/@jmasengesho/azure-machine-learning-service-for-kubernetes-architects-deploy-your-first-model-on-aks-with-az-440ada47b4a0
@@ -297,15 +297,15 @@ kubectl get all -n azureml-workloads
 #rag-on-edge-pubsub-broker: a pub/sub message broker for message passing between the components.
 # kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/edge-aio-in-a-box/main/rag-on-edge/yaml/rag-mq-components-aio0p6.yaml
 
-# #rag-on-edge-web: a web application to interact with the user to submit the search and generation query.
+#rag-on-edge-web: a web application to interact with the user to submit the search and generation query.
 # kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/edge-aio-in-a-box/main/rag-on-edge/yaml/rag-web-workload-aio0p6-acrairstream.yaml
 
-# #rag-on-edge-interface: an interface module to interact with web frontend and the backend components.
+#rag-on-edge-interface: an interface module to interact with web frontend and the backend components.
 # kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/edge-aio-in-a-box/main/rag-on-edge/yaml/rag-interface-dapr-workload-aio0p6-acrairstream.yaml
 
-# #rag-on-edge-vectorDB: a database to store the vectors.
+#rag-on-edge-vectorDB: a database to store the vectors. 
 # kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/edge-aio-in-a-box/main/rag-on-edge/yaml/rag-vdb-dapr-workload-aio0p6-acr-airstream.yaml
 
-# #rag-on-edge-LLM: a large language model (LLM) to generate the response based on the vector search result.
+#rag-on-edge-LLM: a large language model (LLM) to generate the response based on the vector search result.
 # #kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/edge-aio-in-a-box/main/rag-on-edge/yaml/rag-llm-dapr-workload-aio0p6-acrairstream.yaml
 # kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/edge-aio-in-a-box/main/rag-on-edge/yaml/rag-slm-dapr-workload-aio0p6-acrairstream.yaml
