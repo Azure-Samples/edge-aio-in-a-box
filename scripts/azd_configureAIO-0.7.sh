@@ -130,8 +130,9 @@ echo "source <(helm completion bash)" >> /home/$adminUsername/.bashrc
 #Install Azure CLI
 #############################
 echo "Installing Azure CLI"
-curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
-#curl -L https://aka.ms/InstallAzureCLIDeb | sudo bash
+#curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+# Install a specific version
+apt-cache policy azure-cli; sudo apt-get install azure-cli=2.64.0-1~jammy
 
 #############################
 #Azure Arc - Onboard the Cluster to Azure Arc
