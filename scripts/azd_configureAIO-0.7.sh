@@ -292,9 +292,17 @@ kubectl apply -f /home/$adminUsername/cerebral/cerebral.yaml
 sleep 20
 
 #Install Dapr runtime on the cluster
+# az k8s-extension create -g $rg -c $arcK8sClusterName -n dapr --cluster-type connectedClusters --extension-type Microsoft.Dapr --auto-upgrade-minor-version false
+# az k8s-extension create \
+#     -g $rg \
+#     -c $arcK8sClusterName \
+#     -n dapr \
+#     --cluster-type connectedClusters \
+#     --extension-type Microsoft.Dapr \
+#     ---auto-upgrade-minor-version false
+    
 helm repo add dapr https://dapr.github.io/helm-charts/
 helm repo update
-#helm upgrade --install dapr dapr/dapr --version=1.11 --namespace dapr-system --create-namespace --wait
 helm upgrade --install dapr dapr/dapr --version=1.13 --namespace dapr-system --create-namespace --wait
 
 sleep 20
@@ -308,17 +316,20 @@ kubectl get all -n azureml-workloads
 
 #Deploy Azure IoT MQ - Dapr PubSub Components
 #rag-on-edge-pubsub-broker: a pub/sub message broker for message passing between the components.
-kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/edge-aio-in-a-box/main/rag-on-edge/yaml/rag-mq-components-aio0p6.yaml
+kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/edge-aio-in-a-box/main/rag-on-edge/yaml/rag-mq-components-aio7.yaml
 
 #rag-on-edge-web: a web application to interact with the user to submit the search and generation query.
-kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/edge-aio-in-a-box/main/rag-on-edge/yaml/rag-web-workload-aio0p6-acrairstreamv2.yaml
+kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/edge-aio-in-a-box/main/rag-on-edge/yaml/rag-web-workload-aio7-acrairstream.yaml
 
 #rag-on-edge-interface: an interface module to interact with web frontend and the backend components.
-kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/edge-aio-in-a-box/main/rag-on-edge/yaml/rag-interface-dapr-workload-aio0p6-acrairstream.yaml
+kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/edge-aio-in-a-box/main/rag-on-edge/yaml/rag-interface-dapr-workload-aio7-acrairstream.yaml
 
 #rag-on-edge-vectorDB: a database to store the vectors. 
-kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/edge-aio-in-a-box/main/rag-on-edge/yaml/rag-vdb-dapr-workload-aio0p6-acr-airstream.yaml
+kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/edge-aio-in-a-box/main/rag-on-edge/yaml/rag-vdb-dapr-workload-aio7-acrairstream.yaml
 
 #rag-on-edge-LLM: a large language model (LLM) to generate the response based on the vector search result.
-#kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/edge-aio-in-a-box/main/rag-on-edge/yaml/rag-llm-dapr-workload-aio0p6-acrairstream.yaml
-kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/edge-aio-in-a-box/main/rag-on-edge/yaml/rag-slm-dapr-workload-aio0p6-acrairstream.yaml
+#kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/edge-aio-in-a-box/main/rag-on-edge/yaml/rag-llm-dapr-workload-aio7-acrairstream.yaml
+kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/edge-aio-in-a-box/main/rag-on-edge/yaml/rag-slm-dapr-workload-aio7-acrairstream.yaml
+
+#Deploy the OPC PLC simulator
+kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/explore-iot-operations/main/samples/quickstarts/opc-plc-deployment.yaml
