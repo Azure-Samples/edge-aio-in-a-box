@@ -1,0 +1,54 @@
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: iotoperations-pubsub
+  namespace: azure-iot-operations
+  annotations:
+    dapr.io/component-container: >
+      {
+        "name": "iot-operations-dapr-components",
+        "image": "ghcr.io/azure/iot-operations-dapr-components:latest",
+        "volumeMounts": [
+          { "name": "mqtt-client-token", "mountPath": "/var/run/secrets/tokens" },
+          { "name": "aio-ca-trust-bundle", "mountPath": "/var/run/certs/aio-internal-ca-cert" }
+        ],
+        "env": [
+            { "name": "pubSubLogLevel", "value": "Information" },
+            { "name": "stateStoreLogLevel", "value": "Information" },
+            { "name": "defaultLogLevel", "value": "Warning" }
+        ]
+      }
+spec:
+  type: pubsub.azure.iotoperations
+  version: v1
+  metadata:
+  - name: hostname
+    value: aio-broker
+  - name: tcpPort
+    value: 18883
+  - name: useTls
+    value: true
+  - name: caFile
+    value: /var/run/certs/aio-internal-ca-cert/ca.crt
+  - name: satAuthFile
+    value: /var/run/secrets/tokens/mqtt-client-token
+---
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: iotoperations-statestore
+  namespace: azure-iot-operations
+spec:
+  type: state.azure.iotoperations
+  version: v1
+  metadata:
+  - name: hostname
+    value: aio-broker
+  - name: tcpPort
+    value: 18883
+  - name: useTls
+    value: true
+  - name: caFile
+    value: /var/run/certs/aio-internal-ca-cert/ca.crt
+  - name: satAuthFile
+    value: /var/run/secrets/tokens/mqtt-client-token
