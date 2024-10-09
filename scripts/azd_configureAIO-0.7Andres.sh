@@ -303,7 +303,7 @@ kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/edge-aio-in-a-b
 kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/edge-aio-in-a-box/main/rag-on-edge/yaml/rag-web-workload-aio0p6-acrairstream.yaml
 
 #rag-on-edge-interface: an interface module to interact with web frontend and the backend components.
-# kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/edge-aio-in-a-box/main/rag-on-edge/yaml/rag-interface-dapr-workload-aio0p6-acrairstream.yaml
+kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/edge-aio-in-a-box/main/rag-on-edge/yaml/rag-interface-dapr-workload-aio0p6-acrairstream.yaml
 
 #rag-on-edge-vectorDB: a database to store the vectors. 
 # kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/edge-aio-in-a-box/main/rag-on-edge/yaml/rag-vdb-dapr-workload-aio0p6-acr-airstream.yaml
