@@ -147,12 +147,21 @@ az config set auto-upgrade.enable=false
 
 az extension add --name connectedk8s --yes
 
+# curl -L -o connectedk8s-1.10.0-py2.py3-none-any.whl https://github.com/AzureArcForKubernetes/azure-cli-extensions/raw/refs/heads/connectedk8s/public/cli-extensions/connectedk8s-1.10.0-py2.py3-none-any.whl   
+# az extension add --upgrade --source connectedk8s-1.10.0-py2.py3-none-any.whl
+
 # Use the az connectedk8s connect command to Arc-enable your Kubernetes cluster and manage it as part of your Azure resource group
 az connectedk8s connect \
     --resource-group $rg \
     --name $arcK8sClusterName \
     --location $location \
     --kube-config /etc/rancher/k3s/k3s.yaml
+
+# az connectedk8s connect \
+#     --resource-group $rg  \
+#     --name $arcK8sClusterName \
+#     --location $location \
+#     --subscription $subscriptionId --enable-oidc-issuer --enable-workload-identity
 
 #############################
 #Arc for Kubernetes Extensions
@@ -285,7 +294,9 @@ sleep 20
 #Install Dapr runtime on the cluster
 helm repo add dapr https://dapr.github.io/helm-charts/
 helm repo update
-helm upgrade --install dapr dapr/dapr --version=1.11 --namespace dapr-system --create-namespace --wait
+#helm upgrade --install dapr dapr/dapr --version=1.11 --namespace dapr-system --create-namespace --wait
+helm upgrade --install dapr dapr/dapr --version=1.13 --namespace dapr-system --create-namespace --wait
+
 sleep 20
 
 #Creating the ML workload namespace

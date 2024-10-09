@@ -1,7 +1,7 @@
 apiVersion: dapr.io/v1alpha1
 kind: Component
 metadata:
-  name: iotoperations-pubsub
+  name: edgeragpubsub
   namespace: azure-iot-operations
   annotations:
     dapr.io/component-container: >
