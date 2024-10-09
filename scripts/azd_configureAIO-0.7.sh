@@ -130,9 +130,9 @@ echo "source <(helm completion bash)" >> /home/$adminUsername/.bashrc
 #Install Azure CLI
 #############################
 echo "Installing Azure CLI"
-#curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
 # Install a specific version
-apt-cache policy azure-cli; sudo apt-get install azure-cli=2.64.0-1~jammy
+# apt-cache policy azure-cli; sudo apt-get install azure-cli=2.64.0-1~jammy
 
 #############################
 #Azure Arc - Onboard the Cluster to Azure Arc
@@ -143,6 +143,7 @@ az login --identity --username $vmUserAssignedIdentityPrincipalID
 #az account set -s $subscriptionId
 
 az config set extension.use_dynamic_install=yes_without_prompt
+az config set auto-upgrade.enable=false
 
 az extension add --name connectedk8s --yes
 
@@ -164,7 +165,7 @@ sudo apt-get update -y
 sudo apt-get upgrade -y
 
 # Sleep for 60 seconds to allow the cluster to be fully connected
-sleep 60
+sleep 40
 
 #############################
 #Azure IoT Operations
@@ -308,5 +309,5 @@ kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/edge-aio-in-a-b
 kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/edge-aio-in-a-box/main/rag-on-edge/yaml/rag-vdb-dapr-workload-aio0p6-acr-airstream.yaml
 
 #rag-on-edge-LLM: a large language model (LLM) to generate the response based on the vector search result.
-# #kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/edge-aio-in-a-box/main/rag-on-edge/yaml/rag-llm-dapr-workload-aio0p6-acrairstream.yaml
+#kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/edge-aio-in-a-box/main/rag-on-edge/yaml/rag-llm-dapr-workload-aio0p6-acrairstream.yaml
 kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/edge-aio-in-a-box/main/rag-on-edge/yaml/rag-slm-dapr-workload-aio0p6-acrairstream.yaml

@@ -131,7 +131,8 @@ echo "source <(helm completion bash)" >> /home/$adminUsername/.bashrc
 #############################
 echo "Installing Azure CLI"
 curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
-#curl -L https://aka.ms/InstallAzureCLIDeb | sudo bash
+# Install a specific version
+# apt-cache policy azure-cli; sudo apt-get install azure-cli=2.64.0-1~jammy
 
 #############################
 #Azure Arc - Onboard the Cluster to Azure Arc
@@ -142,6 +143,7 @@ az login --identity --username $vmUserAssignedIdentityPrincipalID
 #az account set -s $subscriptionId
 
 az config set extension.use_dynamic_install=yes_without_prompt
+az config set auto-upgrade.enable=false
 
 az extension add --name connectedk8s --yes
 
@@ -163,7 +165,7 @@ sudo apt-get update -y
 sudo apt-get upgrade -y
 
 # Sleep for 60 seconds to allow the cluster to be fully connected
-sleep 60
+sleep 40
 
 #############################
 #Azure IoT Operations
@@ -235,7 +237,7 @@ az k8s-extension create \
 #############################
 #Create a folder for Cerebral configuration files
 mkdir -p /home/$adminUsername/cerebral
-sleep 60
+sleep 30
 
 #Apply the Cerebral namespace
 kubectl apply -f https://raw.githubusercontent.com/Azure/arc_jumpstart_drops/main/sample_app/cerebral_genai/deployment/cerebral-ns.yaml
@@ -248,9 +250,9 @@ sudo chmod 777 /var/lib/influxdb2
 kubectl apply -f https://raw.githubusercontent.com/Azure/arc_jumpstart_drops/main/sample_app/cerebral_genai/deployment/influxdb.yaml
 sleep 30
 kubectl apply -f https://raw.githubusercontent.com/Azure/arc_jumpstart_drops/main/sample_app/cerebral_genai/deployment/influxdb-setup.yaml
-sleep 30
+sleep 20
 kubectl apply -f https://raw.githubusercontent.com/Azure/arc_jumpstart_drops/main/sample_app/cerebral_genai/deployment/cerebral-simulator.yaml
-sleep 30
+sleep 20
 
 #Validate the implementation
 kubectl get all -n cerebral
@@ -260,7 +262,7 @@ kubectl apply -f https://raw.githubusercontent.com/Azure/arc_jumpstart_drops/mai
 
 #Deploy Cerebral Application
 #Download the Cerebral application deployment file
-sleep 30
+sleep 20
 wget -P /home/$adminUsername/cerebral https://raw.githubusercontent.com/Azure/arc_jumpstart_drops/main/sample_app/cerebral_genai/deployment/cerebral.yaml
 
 #Update the Cerebral application deployment file with the Azure OpenAI endpoint
@@ -271,13 +273,13 @@ sed -i "s#<AZURE OPEN AI ENDPOINT>#${aiServicesEndpoint}#g" /home/$adminUsername
 # sed -i 's/2024-03-01-preview/2024-03-15-preview/g' /home/$adminUsername/cerebral/cerebral.yaml
 
 kubectl apply -f /home/$adminUsername/cerebral/cerebral.yaml
-sleep 30
+sleep 20
 
 #Install Dapr runtime on the cluster
 helm repo add dapr https://dapr.github.io/helm-charts/
 helm repo update
 helm upgrade --install dapr dapr/dapr --version=1.11 --namespace dapr-system --create-namespace --wait
-sleep 30
+sleep 20
 
 #Creating the ML workload namespace
 #https://medium.com/@jmasengesho/azure-machine-learning-service-for-kubernetes-architects-deploy-your-first-model-on-aks-with-az-440ada47b4a0
