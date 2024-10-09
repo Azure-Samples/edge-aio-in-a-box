@@ -6,3 +6,4 @@ python-dotenv
 replicate
 streamlit
 duckduckgo-search
+llmware
