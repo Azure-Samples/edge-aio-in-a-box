@@ -33,7 +33,9 @@ The factory copilot on the Edge can leverages data processing in the factory, pr
 
 ### High level Architecture
 Below is the global architecture of this accelerator. The core solution runs on an Ubuntu-based virtual machine using K3s. Alternatively, you can deploy this solution to a dedicated hybrid edge device, allowing the machine learning model to operate closer to your equipment.
-![AIO with AI](/readme_assets/aioaiL.png) 
+![AIO with AI](/readme_assets/aioedgeaiarchitecture.png) 
+
+![AIO with AI](/readme_assets/aioedgeaisolutionoverview.png) 
 
 ### The above architecture is explained step-by-step below:
 1. You create all your necessary Azure Resources
