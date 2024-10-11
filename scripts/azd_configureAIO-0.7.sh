@@ -278,7 +278,6 @@ kubectl apply -f https://raw.githubusercontent.com/Azure/arc_jumpstart_drops/mai
 
 #Deploy Cerebral Application
 #Download the Cerebral application deployment file
-sleep 20
 wget -P /home/$adminUsername/cerebral https://raw.githubusercontent.com/Azure/arc_jumpstart_drops/main/sample_app/cerebral_genai/deployment/cerebral.yaml
 
 #Update the Cerebral application deployment file with the Azure OpenAI endpoint
@@ -352,6 +351,6 @@ az role assignment create --role "Azure Event Hubs Data Sender" --assignee $PRIN
 
 #Create a dataflow to send telemetry to an event hub
 mkdir -p /home/$adminUsername/dataflows
-wget https://raw.githubusercontent.com/Azure-Samples/explore-iot-operations/main/samples/quickstarts/dataflow.yaml
-sed -i 's/<NAMESPACE>/'"evhns-${arcK8sClusterName}"'/' dataflow.yaml
+wget -P /home/$adminUsername/dataflows https://raw.githubusercontent.com/Azure-Samples/explore-iot-operations/main/samples/quickstarts/dataflow.yaml
+sed -i 's/<NAMESPACE>/'"evhns-${arcK8sClusterName}"'/' /home/$adminUsername/dataflows/dataflow.yaml
 kubectl apply -f /home/$adminUsername/dataflows/dataflow.yaml
