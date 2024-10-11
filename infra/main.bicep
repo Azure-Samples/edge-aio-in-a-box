@@ -121,6 +121,12 @@ param acrName string = ''
 @description('The SKU to use for the Azure Container Registry.')
 param acrSku string = 'Standard'
 
+//EventHub Namespace
+@description('The EventHub Namespace Name. If ommited will be generated')
+param eventHubNamespaceName string = ''
+@description('The EventHub Name. If ommited will be generated')
+param eventHubName string = ''
+
 //AI Studio Hub
 @minLength(2)
 @maxLength(12)
@@ -234,7 +240,17 @@ module m_acr './modules/aml/acr.bicep' = {
   }
 }
 
-//8. Dependent resources for the Azure AI Studio Hub
+//Create Azure Event Hub for AIO Data Flows
+module eventhub 'modules/eventHub/eventHub.bicep' = {
+  name: 'deploy_eventhub'
+  scope: resourceGroup
+  params: {
+    eventHubNamespaceName:  !empty(eventHubNamespaceName) ? eventHubNamespaceName : '${abbrs.eventHubNamespaces}${arcK8sClusterName}'
+    eventHubName:  !empty(eventHubName) ? eventHubName : '${abbrs.eventHubNamespacesEventHubs}${arcK8sClusterName}'
+  }
+}
+
+//Create Dependent resources for the Azure AI Studio Hub
 module aiDependencies 'modules/ai/hub-dependencies.bicep' = {
   name: 'dependencies-${name}-${uniqueSuffix}-deployment'
   scope: resourceGroup
@@ -286,6 +302,7 @@ module m_aml './modules/aml/azureml.bicep' = {
     tags: tags
   }
 }
+
 
 //10. Create Create NSG
 module m_nsg 'modules/vnet/nsg.bicep' = {

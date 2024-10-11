@@ -331,5 +331,27 @@ kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/edge-aio-in-a-b
 #kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/edge-aio-in-a-box/main/rag-on-edge/yaml/rag-llm-dapr-workload-aio7-acrairstream.yaml
 kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/edge-aio-in-a-box/main/rag-on-edge/yaml/rag-slm-dapr-workload-aio7-acrairstream.yaml
 
+
+
+
 #Deploy the OPC PLC simulator
 kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/explore-iot-operations/main/samples/quickstarts/opc-plc-deployment.yaml
+
+#Run the following command to deploy a pod that includes the mosquitto_pub and mosquitto_sub tools that are useful for interacting with the MQTT broker in the cluster
+kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/explore-iot-operations/main/samples/quickstarts/mqtt-client.yaml
+
+#Send asset telemetry to the cloud using a dataflow
+#Create an Event Hubs namespace and an event hub
+# az eventhubs namespace create --name "evhns-${arcK8sClusterName}" -g $rg #we are already creating a namespace in the bicep template
+# az eventhubs eventhub create --name "evh-${arcK8sClusterName}" -g $rg --namespace-name "evhns-${arcK8sClusterName}" --retention-time 1 --partition-count 1 --cleanup-policy Delete
+
+#Grant the Azure IoT Operations extension in your cluster access to your Event Hubs namespace
+EVENTHUBRESOURCE=$(az eventhubs namespace show -g $rg --namespace-name "evhns-${arcK8sClusterName}" --query id -o tsv)
+PRINCIPAL=$(az k8s-extension list -g $rg --cluster-name $arcK8sClusterName --cluster-type connectedClusters -o tsv --query "[?extensionType=='microsoft.iotoperations'].identity.principalId")
+az role assignment create --role "Azure Event Hubs Data Sender" --assignee $PRINCIPAL --scope $EVENTHUBRESOURCE
+
+#Create a dataflow to send telemetry to an event hub
+mkdir -p /home/$adminUsername/dataflows
+wget https://raw.githubusercontent.com/Azure-Samples/explore-iot-operations/main/samples/quickstarts/dataflow.yaml
+sed -i 's/<NAMESPACE>/'"evhns-${arcK8sClusterName}"'/' dataflow.yaml
+kubectl apply -f /home/$adminUsername/dataflows/dataflow.yaml
