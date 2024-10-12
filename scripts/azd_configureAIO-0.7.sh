@@ -330,9 +330,6 @@ kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/edge-aio-in-a-b
 #kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/edge-aio-in-a-box/main/rag-on-edge/yaml/rag-llm-dapr-workload-aio7-acrairstream.yaml
 kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/edge-aio-in-a-box/main/rag-on-edge/yaml/rag-slm-dapr-workload-aio7-acrairstream.yaml
 
-
-
-
 #Deploy the OPC PLC simulator
 kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/explore-iot-operations/main/samples/quickstarts/opc-plc-deployment.yaml
 
