@@ -1,0 +1,65 @@
+{
+    "Title": "Azure IoT Operations/K3s with Edge AI",
+    "Summary": "This Drop provides a bicep/azd accelerator for fast deployment of Azure IoT Operations/K3s, empowering AI at the Edge with support for Gen AI or Custom Model deployments.",
+    "Description": "Edge AI plays a vital role in extending AI and ML capabilities by implementing AI and Natural Language Processing (NLP) directly in edge environments. This accelerator offers a foundational setup for Azure IoT Operations, Arc-enabled Kubernetes, Azure OpenAI, and Azure ML, allowing you to integrate custom models into an Azure IoT Operations/K3s environment while also bringing Generative AI closer to the edge.",
+    "Cover": "https://github.com/Azure-Samples/edge-aio-in-a-box/blob/main/readme_assets/cover.png",
+    "Authors": [
+      {
+        "Name": "Andrés Padilla",
+        "Link": "https://www.linkedin.com/in/andrespadillaandrade"
+      },
+      {
+        "Name": "Victor Santana",
+        "Link": "https://www.linkedin.com/in/victorwelascosantana/"
+      },
+      {
+        "Name": "Remco Ploeg",
+        "Link": "https://www.linkedin.com/in/remcoploeg/"
+      },
+      {
+        "Name": "Georgina Siggins",
+        "Link": "https://www.linkedin.com/in/georgina-siggins/"
+      },
+      {
+        "Name": "Alex Morales",
+        "Link": "https://www.linkedin.com/in/alex-morales-45145417/"
+      },
+      {
+        "Name": "Neeraj Jhaveri",
+        "Link": "https://www.linkedin.com/in/neerajjhaveri/"
+      }
+    ],
+    "Source": "https://github.com/Azure-Samples/edge-aio-in-a-box",
+    "Type": "script_automation",
+    "Difficulty": "Advanced",
+    "ProgrammingLanguage": [
+      "Bicep",
+      "Shell",
+      "PowerShell",
+      "Python"
+    ],
+    "Products": [
+      "Azure IoT Operations",
+      "Arc-enabled Kubernetes",
+      "K3s",
+      "Azure OpenAI",
+      "Azure Machine Learning",
+      "Phi3",
+      "Streamlit"
+    ],
+    "LastModified": "",
+    "CreatedDate": "",
+    "Topics": [
+      "ai",
+      "rag",
+      "edge-ai",
+      "k3s",
+      "industrial-iot",
+      "slms",
+      "azure-openai",
+      "generative-ai",
+      "azure-iot-operations",
+      "custom-models",
+      "azure-ml-extension"
+    ]
+}
