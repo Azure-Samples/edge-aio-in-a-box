@@ -11,7 +11,7 @@ dapr-ext-grpc==1.11.0
 ruamel-yaml==0.17.16
 
 # packages for Llama Language Model 2
-langchain==0.1.11
+langchain==0.3.7
 llama_cpp_python==0.2.13
 
 
