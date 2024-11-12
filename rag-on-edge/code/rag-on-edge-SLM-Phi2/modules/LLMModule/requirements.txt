@@ -24,7 +24,7 @@ transformers>=4.35.2
 gguf>=0.1.0
 protobuf>=4.21.0
 langchain>=0.2.10,<0.3.0
-langchain-community==0.2.9
+langchain-community==0.2.19
 langsmith>=0.1.17,<0.2.0
 llama_cpp_python==0.2.43
 pydantic==1.10.13
