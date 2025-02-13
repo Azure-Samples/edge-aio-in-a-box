@@ -329,23 +329,23 @@ kubectl get all -n azureml-workloads
 kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/edge-aio-in-a-box/main/rag-on-edge/yaml/rag-mq-components-aio7.yaml
 
 #rag-on-edge-web: a web application to interact with the user to submit the search and generation query.
-# kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/edge-aio-in-a-box/main/rag-on-edge/yaml/rag-web-workload-aio7-acrairstream.yaml
+kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/edge-aio-in-a-box/main/rag-on-edge/yaml/rag-web-workload-aio7-acrairstream.yaml
 
-# #rag-on-edge-interface: an interface module to interact with web frontend and the backend components.
-# kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/edge-aio-in-a-box/main/rag-on-edge/yaml/rag-interface-dapr-workload-aio7-acrairstream.yaml
+#rag-on-edge-interface: an interface module to interact with web frontend and the backend components.
+kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/edge-aio-in-a-box/main/rag-on-edge/yaml/rag-interface-dapr-workload-aio7-acrairstream.yaml
 
-# #rag-on-edge-vectorDB: a database to store the vectors. 
-# kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/edge-aio-in-a-box/main/rag-on-edge/yaml/rag-vdb-dapr-workload-aio7-acrairstream.yaml
+#rag-on-edge-vectorDB: a database to store the vectors. 
+kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/edge-aio-in-a-box/main/rag-on-edge/yaml/rag-vdb-dapr-workload-aio7-acrairstream.yaml
 
-# #rag-on-edge-LLM: a large language model (LLM) to generate the response based on the vector search result.
-# #kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/edge-aio-in-a-box/main/rag-on-edge/yaml/rag-llm-dapr-workload-aio7-acrairstream.yaml
-# kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/edge-aio-in-a-box/main/rag-on-edge/yaml/rag-slm-dapr-workload-aio7-acrairstream.yaml
+#rag-on-edge-LLM: a large language model (LLM) to generate the response based on the vector search result.
+#kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/edge-aio-in-a-box/main/rag-on-edge/yaml/rag-llm-dapr-workload-aio7-acrairstream.yaml
+kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/edge-aio-in-a-box/main/rag-on-edge/yaml/rag-slm-dapr-workload-aio7-acrairstream.yaml
 
-# #Deploy the OPC PLC simulator
-# kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/explore-iot-operations/main/samples/quickstarts/opc-plc-deployment.yaml
+#Deploy the OPC PLC simulator
+kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/explore-iot-operations/main/samples/quickstarts/opc-plc-deployment.yaml
 
-# #Run the following command to deploy a pod that includes the mosquitto_pub and mosquitto_sub tools that are useful for interacting with the MQTT broker in the cluster
-# kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/explore-iot-operations/main/samples/quickstarts/mqtt-client.yaml
+#Run the following command to deploy a pod that includes the mosquitto_pub and mosquitto_sub tools that are useful for interacting with the MQTT broker in the cluster
+kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/explore-iot-operations/main/samples/quickstarts/mqtt-client.yaml
 
 #Send asset telemetry to the cloud using a dataflow
 #Create an Event Hubs namespace and an event hub
@@ -358,7 +358,8 @@ PRINCIPAL=$(az k8s-extension list -g $rg --cluster-name $arcK8sClusterName --clu
 az role assignment create --role "Azure Event Hubs Data Sender" --assignee $PRINCIPAL --scope $EVENTHUBRESOURCE
 
 #Create a dataflow to send telemetry to an event hub
-# mkdir -p /home/$adminUsername/dataflows
-# wget -P /home/$adminUsername/dataflows https://raw.githubusercontent.com/Azure-Samples/explore-iot-operations/main/samples/quickstarts/dataflow.yaml
-# sed -i 's/<NAMESPACE>/'"evhns-${arcK8sClusterName}"'/' /home/$adminUsername/dataflows/dataflow.yaml
-# kubectl apply -f /home/$adminUsername/dataflows/dataflow.yaml
+mkdir -p /home/$adminUsername/dataflows
+wget -P /home/$adminUsername/dataflows https://raw.githubusercontent.com/Azure-Samples/explore-iot-operations/main/samples/quickstarts/dataflow.yaml
+sed -i 's/<NAMESPACE>/'"evhns-${arcK8sClusterName}"'/' /home/$adminUsername/dataflows/dataflow.yaml
+# kubectl apply -f /home/$adminUsername/dataflows/dataflow.yaml 
+# Need to double check the command above
