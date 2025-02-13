@@ -38,7 +38,7 @@ resource aiServices 'Microsoft.CognitiveServices/accounts@2023-05-01' = {
 
 //https://learn.microsoft.com/en-us/azure/templates/microsoft.cognitiveservices/accounts/deployments
 @batchSize(1)
-resource deployment 'Microsoft.CognitiveServices/accounts/deployments@2023-05-01' = [for deployment in deployments: {
+resource deployment 'Microsoft.CognitiveServices/accounts/deployments@2024-10-01' = [for deployment in deployments: {
   parent: aiServices
   name: deployment.name
   properties: {

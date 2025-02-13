@@ -212,6 +212,7 @@ SUFFIX=$(tr -dc 'a-z0-9' </dev/urandom | head -c 4)
 SCHEMA_REGISTRY="${SCHEMA_REGISTRY}${SUFFIX}"
 SCHEMA_REGISTRY_NAMESPACE="${SCHEMA_REGISTRY_NAMESPACE}${SUFFIX}"
 
+echo "Install the latest Azure IoT Operations CLI extension."
 az extension add -name azure-iot-ops --upgrade --yes --allow-preview false
 
 echo "Create a schema registry which will be used by Azure IoT Operations components after the deployment and connects it to the Azure Storage account."
@@ -221,15 +222,39 @@ az iot ops schema registry create -g $rg -n $SCHEMA_REGISTRY --registry-namespac
 echo "Prepare the cluster for Azure IoT Operations deployment."
 #az iot ops schema registry show --name aiobxregistry1 --resource-group aiobxap070-aioedgeai-rg -o tsv --query id
 #az iot ops init -g aiobxap070-aioedgeai-rg --cluster aiobmclusterap --sr-resource-id "/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxx/resourceGroups/aiobxap070-aioedgeai-rg/providers/Microsoft.DeviceRegistry/schemaRegistries/aiobxregistry1"
+# az iot ops init -g $rg \
+#     --cluster $arcK8sClusterName \
+#     --sr-resource-id "$(az iot ops schema registry show --name $SCHEMA_REGISTRY --resource-group $rg -o tsv --query id)"
+
+# az iot ops init -g rg-aiobx1a --cluster aiobmclusterapx1a
+
 az iot ops init -g $rg \
-    --cluster $arcK8sClusterName \
-    --sr-resource-id "$(az iot ops schema registry show --name $SCHEMA_REGISTRY --resource-group $rg -o tsv --query id)"
+    --cluster $arcK8sClusterName
 
 echo "Deploy Azure IoT Operations."
+# az iot ops create -g $rg \
+#     --cluster $arcK8sClusterName \
+#     --custom-location "${arcK8sClusterName}-cl-${SUFFIX}" \
+#     -n "${arcK8sClusterName}-ops-instance"
+
 az iot ops create -g $rg \
     --cluster $arcK8sClusterName \
     --custom-location "${arcK8sClusterName}-cl-${SUFFIX}" \
-    -n "${arcK8sClusterName}-ops-instance"
+    -n "${arcK8sClusterName}-ops-instance" \
+    --sr-resource-id "$(az iot ops schema registry show --name $SCHEMA_REGISTRY --resource-group $rg -o tsv --query id)" \
+    --broker-frontend-replicas 1 --broker-frontend-workers 1 --broker-backend-part 1 --broker-backend-workers 1 --broker-backend-rf 2 --broker-mem-profile Low
+
+# az iot ops create -g $rg \  
+#     --cluster $arcK8sClusterName \
+#     --custom-location aiobmclusterapx1a-cl-7623 \
+#     -n "${arcK8sClusterName}-ops-instance"  
+#     --sr-resource-id /subscriptions/8675097d-27fd-45e1-a5ca-15734c961b11/resourceGroups/rg-aiobx1a/providers/Microsoft.DeviceRegistry/schemaRegistries/aiobxregistry5hjg  
+#     --broker-frontend-replicas 1  
+#     --broker-frontend-workers 1  
+#     --broker-backend-part 1  
+#     --broker-backend-workers 1  
+#     --broker-backend-rf 2  
+#     --broker-mem-profile Low
 
 
 #############################
@@ -252,36 +277,36 @@ az k8s-extension create \
 #Deploy Namespace, InfluxDB, Simulator, and Redis
 #############################
 #Create a folder for Cerebral configuration files
-# mkdir -p /home/$adminUsername/cerebral
-# sleep 30
+mkdir -p /home/$adminUsername/cerebral
+sleep 30
 
-# #Apply the Cerebral namespace
-# kubectl apply -f https://raw.githubusercontent.com/Azure/arc_jumpstart_drops/main/sample_app/cerebral_genai/deployment/cerebral-ns.yaml
+#Apply the Cerebral namespace
+kubectl apply -f https://raw.githubusercontent.com/Azure/arc_jumpstart_drops/main/sample_app/cerebral_genai/deployment/cerebral-ns.yaml
 
-# #Create a directory for persistent InfluxDB data
-# sudo mkdir /var/lib/influxdb2
-# sudo chmod 777 /var/lib/influxdb2
+#Create a directory for persistent InfluxDB data
+sudo mkdir /var/lib/influxdb2
+sudo chmod 777 /var/lib/influxdb2
 
 #Deploy InfluxDB, Configure InfluxDB, and Deploy the Data Simulator
-# kubectl apply -f https://raw.githubusercontent.com/Azure/arc_jumpstart_drops/main/sample_app/cerebral_genai/deployment/influxdb.yaml
-# sleep 30
-# kubectl apply -f https://raw.githubusercontent.com/Azure/arc_jumpstart_drops/main/sample_app/cerebral_genai/deployment/influxdb-setup.yaml
-# sleep 20
-# kubectl apply -f https://raw.githubusercontent.com/Azure/arc_jumpstart_drops/main/sample_app/cerebral_genai/deployment/cerebral-simulator.yaml
-# sleep 20
+kubectl apply -f https://raw.githubusercontent.com/Azure/arc_jumpstart_drops/main/sample_app/cerebral_genai/deployment/influxdb.yaml
+sleep 30
+kubectl apply -f https://raw.githubusercontent.com/Azure/arc_jumpstart_drops/main/sample_app/cerebral_genai/deployment/influxdb-setup.yaml
+sleep 20
+kubectl apply -f https://raw.githubusercontent.com/Azure/arc_jumpstart_drops/main/sample_app/cerebral_genai/deployment/cerebral-simulator.yaml
+sleep 20
 
-# #Validate the implementation
-# kubectl get all -n cerebral
+#Validate the implementation
+kubectl get all -n cerebral
 
-# #Deploy Redis to store user sessions and conversation history
-# kubectl apply -f https://raw.githubusercontent.com/Azure/arc_jumpstart_drops/main/sample_app/cerebral_genai/deployment/redis.yaml
+#Deploy Redis to store user sessions and conversation history
+kubectl apply -f https://raw.githubusercontent.com/Azure/arc_jumpstart_drops/main/sample_app/cerebral_genai/deployment/redis.yaml
 
-# #Deploy Cerebral Application
-# #Download the Cerebral application deployment file
-# wget -P /home/$adminUsername/cerebral https://raw.githubusercontent.com/Azure/arc_jumpstart_drops/main/sample_app/cerebral_genai/deployment/cerebral.yaml
+#Deploy Cerebral Application
+#Download the Cerebral application deployment file
+wget -P /home/$adminUsername/cerebral https://raw.githubusercontent.com/Azure/arc_jumpstart_drops/main/sample_app/cerebral_genai/deployment/cerebral.yaml
 
-# #Update the Cerebral application deployment file with the Azure OpenAI endpoint
-# # sed -i 's/<YOUR_OPENAI>/THISISYOURAISERVICESKEY/g' /home/$adminUsername/cerebral/cerebral.yaml
+#Update the Cerebral application deployment file with the Azure OpenAI endpoint
+# sed -i 's/<YOUR_OPENAI>/THISISYOURAISERVICESKEY/g' /home/$adminUsername/cerebral/cerebral.yaml
 # sed -i "s/<YOUR_OPENAI>/${aiservicesKey}/g" /home/$adminUsername/cerebral/cerebral.yaml
 # # sed -i 's#<AZURE OPEN AI ENDPOINT>#https://aistdioserviceeast.openai.azure.com/#g' /home/$adminUsername/cerebral/cerebral.yaml
 # sed -i "s#<AZURE OPEN AI ENDPOINT>#${aiServicesEndpoint}#g" /home/$adminUsername/cerebral/cerebral.yaml
