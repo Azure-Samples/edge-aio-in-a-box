@@ -226,8 +226,6 @@ echo "Prepare the cluster for Azure IoT Operations deployment."
 #     --cluster $arcK8sClusterName \
 #     --sr-resource-id "$(az iot ops schema registry show --name $SCHEMA_REGISTRY --resource-group $rg -o tsv --query id)"
 
-# az iot ops init -g rg-aiobx1a --cluster aiobmclusterapx1a
-
 az iot ops init -g $rg \
     --cluster $arcK8sClusterName
 
@@ -243,18 +241,6 @@ az iot ops create -g $rg \
     -n "${arcK8sClusterName}-ops-instance" \
     --sr-resource-id "$(az iot ops schema registry show --name $SCHEMA_REGISTRY --resource-group $rg -o tsv --query id)" \
     --broker-frontend-replicas 1 --broker-frontend-workers 1 --broker-backend-part 1 --broker-backend-workers 1 --broker-backend-rf 2 --broker-mem-profile Low
-
-# az iot ops create -g $rg \  
-#     --cluster $arcK8sClusterName \
-#     --custom-location aiobmclusterapx1a-cl-7623 \
-#     -n "${arcK8sClusterName}-ops-instance"  
-#     --sr-resource-id /subscriptions/8675097d-27fd-45e1-a5ca-15734c961b11/resourceGroups/rg-aiobx1a/providers/Microsoft.DeviceRegistry/schemaRegistries/aiobxregistry5hjg  
-#     --broker-frontend-replicas 1  
-#     --broker-frontend-workers 1  
-#     --broker-backend-part 1  
-#     --broker-backend-workers 1  
-#     --broker-backend-rf 2  
-#     --broker-mem-profile Low
 
 
 #############################
@@ -307,13 +293,13 @@ wget -P /home/$adminUsername/cerebral https://raw.githubusercontent.com/Azure/ar
 
 #Update the Cerebral application deployment file with the Azure OpenAI endpoint
 # sed -i 's/<YOUR_OPENAI>/THISISYOURAISERVICESKEY/g' /home/$adminUsername/cerebral/cerebral.yaml
-# sed -i "s/<YOUR_OPENAI>/${aiservicesKey}/g" /home/$adminUsername/cerebral/cerebral.yaml
-# # sed -i 's#<AZURE OPEN AI ENDPOINT>#https://aistdioserviceeast.openai.azure.com/#g' /home/$adminUsername/cerebral/cerebral.yaml
-# sed -i "s#<AZURE OPEN AI ENDPOINT>#${aiServicesEndpoint}#g" /home/$adminUsername/cerebral/cerebral.yaml
-# # sed -i 's/2024-03-01-preview/2024-03-15-preview/g' /home/$adminUsername/cerebral/cerebral.yaml
+sed -i "s/<YOUR_OPENAI>/${aiservicesKey}/g" /home/$adminUsername/cerebral/cerebral.yaml
+# sed -i 's#<AZURE OPEN AI ENDPOINT>#https://aistdioserviceeast.openai.azure.com/#g' /home/$adminUsername/cerebral/cerebral.yaml
+sed -i "s#<AZURE OPEN AI ENDPOINT>#${aiServicesEndpoint}#g" /home/$adminUsername/cerebral/cerebral.yaml
+# sed -i 's/2024-03-01-preview/2024-03-15-preview/g' /home/$adminUsername/cerebral/cerebral.yaml
 
-# kubectl apply -f /home/$adminUsername/cerebral/cerebral.yaml
-# sleep 20
+kubectl apply -f /home/$adminUsername/cerebral/cerebral.yaml
+sleep 20
 
 #Install Dapr runtime on the cluster
 # az k8s-extension create -g $rg -c $arcK8sClusterName -n dapr --cluster-type connectedClusters --extension-type Microsoft.Dapr --auto-upgrade-minor-version false
@@ -325,54 +311,54 @@ wget -P /home/$adminUsername/cerebral https://raw.githubusercontent.com/Azure/ar
 #     --extension-type Microsoft.Dapr \
 #     ---auto-upgrade-minor-version false
     
-# helm repo add dapr https://dapr.github.io/helm-charts/
-# helm repo update
-# helm upgrade --install dapr dapr/dapr --version=1.13 --namespace dapr-system --create-namespace --wait
+helm repo add dapr https://dapr.github.io/helm-charts/
+helm repo update
+helm upgrade --install dapr dapr/dapr --version=1.13 --namespace dapr-system --create-namespace --wait
 
-# sleep 20
+sleep 20
 
-# #Creating the ML workload namespace
-# #https://medium.com/@jmasengesho/azure-machine-learning-service-for-kubernetes-architects-deploy-your-first-model-on-aks-with-az-440ada47b4a0
-# #When creating the Azure ML Extension we do not want all the ML workloads and models we create later on on the same namespace as the Azure ML Extension.
-# #So we will create a separate namespace for the ML workloads and models.
-# kubectl create namespace azureml-workloads
-# kubectl get all -n azureml-workloads
+#Creating the ML workload namespace
+#https://medium.com/@jmasengesho/azure-machine-learning-service-for-kubernetes-architects-deploy-your-first-model-on-aks-with-az-440ada47b4a0
+#When creating the Azure ML Extension we do not want all the ML workloads and models we create later on on the same namespace as the Azure ML Extension.
+#So we will create a separate namespace for the ML workloads and models.
+kubectl create namespace azureml-workloads
+kubectl get all -n azureml-workloads
 
-# #Deploy Azure IoT MQ - Dapr PubSub Components
-# #rag-on-edge-pubsub-broker: a pub/sub message broker for message passing between the components.
-# kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/edge-aio-in-a-box/main/rag-on-edge/yaml/rag-mq-components-aio7.yaml
+#Deploy Azure IoT MQ - Dapr PubSub Components
+#rag-on-edge-pubsub-broker: a pub/sub message broker for message passing between the components.
+kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/edge-aio-in-a-box/main/rag-on-edge/yaml/rag-mq-components-aio7.yaml
 
-# #rag-on-edge-web: a web application to interact with the user to submit the search and generation query.
-# kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/edge-aio-in-a-box/main/rag-on-edge/yaml/rag-web-workload-aio7-acrairstream.yaml
+#rag-on-edge-web: a web application to interact with the user to submit the search and generation query.
+kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/edge-aio-in-a-box/main/rag-on-edge/yaml/rag-web-workload-aio7-acrairstream.yaml
 
-# #rag-on-edge-interface: an interface module to interact with web frontend and the backend components.
-# kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/edge-aio-in-a-box/main/rag-on-edge/yaml/rag-interface-dapr-workload-aio7-acrairstream.yaml
+#rag-on-edge-interface: an interface module to interact with web frontend and the backend components.
+kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/edge-aio-in-a-box/main/rag-on-edge/yaml/rag-interface-dapr-workload-aio7-acrairstream.yaml
 
-# #rag-on-edge-vectorDB: a database to store the vectors. 
-# kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/edge-aio-in-a-box/main/rag-on-edge/yaml/rag-vdb-dapr-workload-aio7-acrairstream.yaml
+#rag-on-edge-vectorDB: a database to store the vectors. 
+kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/edge-aio-in-a-box/main/rag-on-edge/yaml/rag-vdb-dapr-workload-aio7-acrairstream.yaml
 
-# #rag-on-edge-LLM: a large language model (LLM) to generate the response based on the vector search result.
-# #kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/edge-aio-in-a-box/main/rag-on-edge/yaml/rag-llm-dapr-workload-aio7-acrairstream.yaml
-# kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/edge-aio-in-a-box/main/rag-on-edge/yaml/rag-slm-dapr-workload-aio7-acrairstream.yaml
+#rag-on-edge-LLM: a large language model (LLM) to generate the response based on the vector search result.
+#kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/edge-aio-in-a-box/main/rag-on-edge/yaml/rag-llm-dapr-workload-aio7-acrairstream.yaml
+kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/edge-aio-in-a-box/main/rag-on-edge/yaml/rag-slm-dapr-workload-aio7-acrairstream.yaml
 
-# #Deploy the OPC PLC simulator
-# kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/explore-iot-operations/main/samples/quickstarts/opc-plc-deployment.yaml
+#Deploy the OPC PLC simulator
+kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/explore-iot-operations/main/samples/quickstarts/opc-plc-deployment.yaml
 
-# #Run the following command to deploy a pod that includes the mosquitto_pub and mosquitto_sub tools that are useful for interacting with the MQTT broker in the cluster
-# kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/explore-iot-operations/main/samples/quickstarts/mqtt-client.yaml
+#Run the following command to deploy a pod that includes the mosquitto_pub and mosquitto_sub tools that are useful for interacting with the MQTT broker in the cluster
+kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/explore-iot-operations/main/samples/quickstarts/mqtt-client.yaml
 
-# #Send asset telemetry to the cloud using a dataflow
-# #Create an Event Hubs namespace and an event hub
-# # az eventhubs namespace create --name "evhns-${arcK8sClusterName}" -g $rg #we are already creating a namespace in the bicep template
-# # az eventhubs eventhub create --name "evh-${arcK8sClusterName}" -g $rg --namespace-name "evhns-${arcK8sClusterName}" --retention-time 1 --partition-count 1 --cleanup-policy Delete
+#Send asset telemetry to the cloud using a dataflow
+#Create an Event Hubs namespace and an event hub
+# az eventhubs namespace create --name "evhns-${arcK8sClusterName}" -g $rg #we are already creating a namespace in the bicep template
+# az eventhubs eventhub create --name "evh-${arcK8sClusterName}" -g $rg --namespace-name "evhns-${arcK8sClusterName}" --retention-time 1 --partition-count 1 --cleanup-policy Delete
 
-# #Grant the Azure IoT Operations extension in your cluster access to your Event Hubs namespace
-# EVENTHUBRESOURCE=$(az eventhubs namespace show -g $rg --namespace-name "evhns-${arcK8sClusterName}" --query id -o tsv)
-# PRINCIPAL=$(az k8s-extension list -g $rg --cluster-name $arcK8sClusterName --cluster-type connectedClusters -o tsv --query "[?extensionType=='microsoft.iotoperations'].identity.principalId")
-# az role assignment create --role "Azure Event Hubs Data Sender" --assignee $PRINCIPAL --scope $EVENTHUBRESOURCE
+#Grant the Azure IoT Operations extension in your cluster access to your Event Hubs namespace
+EVENTHUBRESOURCE=$(az eventhubs namespace show -g $rg --namespace-name "evhns-${arcK8sClusterName}" --query id -o tsv)
+PRINCIPAL=$(az k8s-extension list -g $rg --cluster-name $arcK8sClusterName --cluster-type connectedClusters -o tsv --query "[?extensionType=='microsoft.iotoperations'].identity.principalId")
+az role assignment create --role "Azure Event Hubs Data Sender" --assignee $PRINCIPAL --scope $EVENTHUBRESOURCE
 
-# #Create a dataflow to send telemetry to an event hub
-# mkdir -p /home/$adminUsername/dataflows
-# wget -P /home/$adminUsername/dataflows https://raw.githubusercontent.com/Azure-Samples/explore-iot-operations/main/samples/quickstarts/dataflow.yaml
-# sed -i 's/<NAMESPACE>/'"evhns-${arcK8sClusterName}"'/' /home/$adminUsername/dataflows/dataflow.yaml
-# kubectl apply -f /home/$adminUsername/dataflows/dataflow.yaml
+#Create a dataflow to send telemetry to an event hub
+mkdir -p /home/$adminUsername/dataflows
+wget -P /home/$adminUsername/dataflows https://raw.githubusercontent.com/Azure-Samples/explore-iot-operations/main/samples/quickstarts/dataflow.yaml
+sed -i 's/<NAMESPACE>/'"evhns-${arcK8sClusterName}"'/' /home/$adminUsername/dataflows/dataflow.yaml
+kubectl apply -f /home/$adminUsername/dataflows/dataflow.yaml
