@@ -166,7 +166,7 @@ resource resourceGroup 'Microsoft.Resources/resourceGroups@2023-07-01' = {
   tags: tags
 }
 
-//2. Create UAMI
+//Create UAMI
 module m_msi 'modules/identity/msi.bicep' = {
   name: 'deploy_msi'
   scope: resourceGroup
@@ -177,7 +177,7 @@ module m_msi 'modules/identity/msi.bicep' = {
   }
 }
 
-//3. Create KeyVault used for Azure IoT Operations
+//Create KeyVault used for Azure IoT Operations
 //https://docs.microsoft.com/en-us/azure/templates/microsoft.keyvault/vaults
 module m_kvn 'modules/keyvault/keyvault.bicep' = {
   name: 'deploy_keyvault'
@@ -192,7 +192,7 @@ module m_kvn 'modules/keyvault/keyvault.bicep' = {
   }
 }
 
-//4. Create Required Storage Account(s)
+//Create Required Storage Account(s)
 //Deploy Storage Accounts (Create your Storage Account for your ML and AI Studio Workspace)
 //https://docs.microsoft.com/en-us/azure/templates/microsoft.storage/storageaccounts
 module m_stg 'modules/storage/storage-account.bicep' = {
@@ -203,7 +203,7 @@ module m_stg 'modules/storage/storage-account.bicep' = {
   }
 }
 
-//5. Create Log Analytics Workspace
+//Create Log Analytics Workspace
 //https://learn.microsoft.com/en-us/azure/templates/microsoft.insights/components?pivots=deployment-language-bicep
 module m_loga 'modules/aml/loganalytics.bicep' = {
   name: 'deploy_loganalytics'
@@ -215,7 +215,7 @@ module m_loga 'modules/aml/loganalytics.bicep' = {
   }
 }
 
-//6. Create Application Insights Instance
+//Create Application Insights Instance
 //https://learn.microsoft.com/en-us/azure/templates/microsoft.insights/components?pivots=deployment-language-bicep
 module m_aisn 'modules/aml/applicationinsights.bicep' = {
   name: 'deploy_appinsights'
@@ -227,7 +227,7 @@ module m_aisn 'modules/aml/applicationinsights.bicep' = {
   }
 }
 
-//7. Create Azure Container Registry
+//Create Azure Container Registry
 //https://learn.microsoft.com/en-us/azure/templates/microsoft.machinelearningservices/workspaces?pivots=deployment-language-bicep
 module m_acr './modules/aml/acr.bicep' = {
   name: 'deploy_acr'
@@ -261,7 +261,7 @@ module aiDependencies 'modules/ai/hub-dependencies.bicep' = {
   }
 }
 
-//9. Create Azure AI Studio Hub
+//Create Azure AI Studio Hub
 module aiHub 'modules/ai/ai-hub.bicep' = {
   name: 'ai-${name}-${uniqueSuffix}-deployment'
   scope: resourceGroup
@@ -283,7 +283,7 @@ module aiHub 'modules/ai/ai-hub.bicep' = {
   }
 }
 
-//15. Create Azure Machine Learning Workspace
+//Create Azure Machine Learning Workspace
 //https://learn.microsoft.com/en-us/azure/templates/microsoft.machinelearningservices/workspaces?pivots=deployment-language-bicep
 module m_aml './modules/aml/azureml.bicep' = {
   name: 'deploy_azureml'
@@ -304,7 +304,7 @@ module m_aml './modules/aml/azureml.bicep' = {
 }
 
 
-//10. Create Create NSG
+//Create Create NSG
 module m_nsg 'modules/vnet/nsg.bicep' = {
   name: 'deploy_nsg'
   scope: resourceGroup
@@ -420,7 +420,7 @@ module m_nsg 'modules/vnet/nsg.bicep' = {
   }
 }
 
-//11. Create VNET
+//Create VNET
 module m_vnet 'modules/vnet/vnet.bicep' = {
   name: 'deploy_vnet'
   scope: resourceGroup
@@ -439,7 +439,7 @@ module m_vnet 'modules/vnet/vnet.bicep' = {
   }
 }
 
-//12. Create VM/K3s Public IP
+//Create VM/K3s Public IP
 module m_pip 'modules/vnet/publicip.bicep' = {
   name: 'deploy_pip'
   scope: resourceGroup
@@ -457,7 +457,7 @@ module m_pip 'modules/vnet/publicip.bicep' = {
   }
 }
 
-//13. Build reference of existing subnets
+//Build reference of existing subnets
 resource subnet 'Microsoft.Network/virtualNetworks/subnets@2023-05-01' existing = {
   scope: resourceGroup
   name: '${m_vnet.outputs.vnetName}/${subnetName}'
@@ -476,7 +476,7 @@ module roleOwner 'modules/identity/role.bicep' = {
   ]
 }
 
-//4. Create Required Storage Account with HNS Enabled for AIO Schema
+//Create Required Storage Account with HNS Enabled for AIO Schema
 //https://docs.microsoft.com/en-us/azure/templates/microsoft.storage/storageaccounts
 module m_stghns 'modules/storage/storage.bicep' = {
   name: 'deploy_storageaccounthns'
@@ -492,7 +492,7 @@ module m_stghns 'modules/storage/storage.bicep' = {
   ]
 }
 
-//14. Create Ubuntu VM for K3s
+//Create Ubuntu VM for K3s
 module m_vm 'modules/vm/vm-ubuntu.bicep' = {
   name: 'deploy_K3sVM'
   scope: resourceGroup
